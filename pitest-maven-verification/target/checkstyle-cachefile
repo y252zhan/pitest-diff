@@ -1,0 +1,21 @@
+#Sun Oct 11 17:11:20 PDT 2015
+/Users/user/Desktop/pitest-pitest-parent-1.1.7/pitest-maven-verification/src/test/resources/pit-testng-jmockit/src/main/java/com/example/ValueHolder.java=1443472218000
+/Users/user/Desktop/pitest-pitest-parent-1.1.7/pitest-maven-verification/src/test/resources/pit-powermock/src/main/java/com/example/PowerMockCallsOwnMethod.java=1443472218000
+/Users/user/Desktop/pitest-pitest-parent-1.1.7/pitest-maven-verification/src/test/resources/pit-deterministic-coverage/src/main/java/com/example/CoveredByMultipleThreads.java=1443472218000
+/Users/user/Desktop/pitest-pitest-parent-1.1.7/pitest-maven-verification/src/test/resources/pit-183-gwtmockito/src/main/java/sample/MyWidget.java=1443472218000
+/Users/user/Desktop/pitest-pitest-parent-1.1.7/pitest-maven-verification/src/test/resources/pit-183-gwtmockito/src/main/java/sample/MyServiceAsync.java=1443472218000
+/Users/user/Desktop/pitest-pitest-parent-1.1.7/pitest-maven-verification/src/test/resources/pit-powermock/src/main/java/com/example/PowerMockFoo.java=1443472218000
+/Users/user/Desktop/pitest-pitest-parent-1.1.7/pitest-maven-verification/src/test/resources/pit-surefire-excludes/src/main/java/com/example/Covered.java=1443472218000
+/Users/user/Desktop/pitest-pitest-parent-1.1.7/pitest-maven-verification/src/test/resources/pit-powermock/src/main/java/com/example/PowerMockCallFoo.java=1443472218000
+/Users/user/Desktop/pitest-pitest-parent-1.1.7/pitest-maven-verification/src/test/resources/pit-surefire-excludes/src/main/java/com/example/NotCovered.java=1443472218000
+/Users/user/Desktop/pitest-pitest-parent-1.1.7/pitest-maven-verification/src/test/resources/pit-33-setUserDir/pit-33-setUserDir-subModule/src/main/java/org/example/SystemUnderTest.java=1443472218000
+/Users/user/Desktop/pitest-pitest-parent-1.1.7/pitest-maven-verification/src/test/resources/pit-testng/src/main/java/com/example/Covered.java=1443472218000
+/Users/user/Desktop/pitest-pitest-parent-1.1.7/pitest-maven-verification/src/test/resources/pit-158-coverage/src/main/java/com/example/MyRequest.java=1443472218000
+/Users/user/Desktop/pitest-pitest-parent-1.1.7/pitest-maven-verification/src/test/resources/pit-junit-categories/src/main/java/com/example/NotCovered.java=1443472218000
+/Users/user/Desktop/pitest-pitest-parent-1.1.7/pitest-maven-verification/src/test/resources/pit-183-gwtmockito/src/main/java/sample/MyService.java=1443472218000
+configuration*?=A65B563220E78F96C45649B02514673C6091EA94
+/Users/user/Desktop/pitest-pitest-parent-1.1.7/pitest-maven-verification/src/test/resources/pit-testng-jmockit/src/main/java/com/example/Covered.java=1443472218000
+/Users/user/Desktop/pitest-pitest-parent-1.1.7/pitest-maven-verification/src/test/resources/pit-powermock/src/main/java/com/example/PowerMockAgentFoo.java=1443472218000
+/Users/user/Desktop/pitest-pitest-parent-1.1.7/pitest-maven-verification/src/test/resources/pit-site-reportonly/src/main/java/com/example/Covered.java=1443472218000
+/Users/user/Desktop/pitest-pitest-parent-1.1.7/pitest-maven-verification/src/test/resources/pit-junit-categories/src/main/java/com/example/Covered.java=1443472218000
+/Users/user/Desktop/pitest-pitest-parent-1.1.7/pitest-maven-verification/src/test/resources/pit-powermock/src/main/java/com/example/PowerMockAgentCallFoo.java=1443472218000
