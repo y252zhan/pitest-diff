@@ -1,12 +1,12 @@
 /*
  * Copyright 2011 Henry Coles
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,22 +18,22 @@ import org.pitest.classinfo.ClassName;
 import org.pitest.functional.F;
 import org.pitest.functional.Option;
 
-public final class TestInfo {
+public class TestInfo {
 
   private final String            name;
   private final String            definingClass;
-
+  
   private final int               time;
-  private final int               blocks;
+  private final int               linesCovered;
   private final Option<ClassName> testee;
 
   public TestInfo(final String definingClass, final String name,
-      final int time, final Option<ClassName> testee, final int blocksCovered) {
+      final int time, final Option<ClassName> testee, final int linesCovered) {
     this.definingClass = internIfNotNull(definingClass);
     this.name = name;
     this.time = time;
     this.testee = testee;
-    this.blocks = blocksCovered;
+    this.linesCovered = linesCovered;
   }
 
   private String internIfNotNull(final String string) {
@@ -51,8 +51,8 @@ public final class TestInfo {
     return this.time;
   }
 
-  public int getNumberOfBlocksCovered() {
-    return this.blocks;
+  public int getNumberOfLinesCovered() {
+    return this.linesCovered;
   }
 
   @Override
@@ -62,7 +62,6 @@ public final class TestInfo {
 
   public static F<TestInfo, String> toName() {
     return new F<TestInfo, String>() {
-      @Override
       public String apply(final TestInfo a) {
         return a.getName();
       }
@@ -73,7 +72,6 @@ public final class TestInfo {
   public static F<TestInfo, ClassName> toDefiningClassName() {
     return new F<TestInfo, ClassName>() {
 
-      @Override
       public ClassName apply(final TestInfo a) {
         return new ClassName(a.definingClass);
       }

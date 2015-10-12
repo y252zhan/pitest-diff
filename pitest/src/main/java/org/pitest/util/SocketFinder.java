@@ -1,12 +1,12 @@
 /*
  * Copyright 2011 Henry Coles
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,10 +20,10 @@ import java.util.logging.Logger;
 
 public class SocketFinder {
 
-  private static final Logger LOG             = Log.getLogger();
+  private final static Logger LOG             = Log.getLogger();
 
-  private static final int    MIN_PORT_NUMBER = 8091;
-  private static final int    MAX_PORT_NUMBER = 9000;
+  private final static int    MIN_PORT_NUMBER = 8091;
+  private final static int    MAX_PORT_NUMBER = 9000;
 
   private int                 lastPortNumber  = MIN_PORT_NUMBER;
 

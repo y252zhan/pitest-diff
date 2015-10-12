@@ -1,12 +1,12 @@
 /*
  * Copyright 2011 Henry Coles and Stefan Penndorf
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -33,8 +33,7 @@ public class RemoveSwitchMutatorTest extends MutatorTestBase {
 
   @Test
   public void shouldProvideAMeaningfulName() {
-    assertEquals("EXPERIMENTAL_REMOVE_SWITCH_MUTATOR_2",
-        new RemoveSwitchMutator(2).getName());
+    assertEquals("EXPERIMENTAL_REMOVE_SWITCH_MUTATOR_2", new RemoveSwitchMutator(2).getName());
   }
 
   private static class HasIntSwitchWithDefault implements Callable<Integer> {
@@ -45,7 +44,6 @@ public class RemoveSwitchMutatorTest extends MutatorTestBase {
       this.value = value;
     }
 
-    @Override
     public Integer call() throws Exception {
       switch (this.value) {
       case 0:
@@ -77,7 +75,6 @@ public class RemoveSwitchMutatorTest extends MutatorTestBase {
       this.value = value;
     }
 
-    @Override
     public Character call() throws Exception {
       switch (this.value) {
       case 'a':
@@ -113,7 +110,6 @@ public class RemoveSwitchMutatorTest extends MutatorTestBase {
       this.value = value;
     }
 
-    @Override
     public Integer call() throws Exception {
       switch (this.value) {
       case FIRST:
@@ -131,18 +127,14 @@ public class RemoveSwitchMutatorTest extends MutatorTestBase {
   @Test
   public void shouldChangeLabelEnum() throws Exception {
     final Mutant mutant = getFirstMutant(HasEnumSwitchWithDefault.class);
-    assertMutantCallableReturns(new HasEnumSwitchWithDefault(SwitchEnum.FIRST),
-        mutant, 1);
-    assertMutantCallableReturns(
-        new HasEnumSwitchWithDefault(SwitchEnum.SECOND), mutant, 2);
-    assertMutantCallableReturns(new HasEnumSwitchWithDefault(SwitchEnum.THIRD),
-        mutant, -1);
-    assertMutantCallableReturns(
-        new HasEnumSwitchWithDefault(SwitchEnum.DEFAULT), mutant, -1);
+    assertMutantCallableReturns(new HasEnumSwitchWithDefault(SwitchEnum.FIRST), mutant, 1);
+    assertMutantCallableReturns(new HasEnumSwitchWithDefault(SwitchEnum.SECOND), mutant, 2);
+    assertMutantCallableReturns(new HasEnumSwitchWithDefault(SwitchEnum.THIRD), mutant, -1);
+    assertMutantCallableReturns(new HasEnumSwitchWithDefault(SwitchEnum.DEFAULT), mutant, -1);
   }
 
   private static class HasMultipleArmIntSwitchWithDefault implements
-  Callable<Integer> {
+      Callable<Integer> {
 
     private final int value;
 
@@ -150,7 +142,6 @@ public class RemoveSwitchMutatorTest extends MutatorTestBase {
       this.value = value;
     }
 
-    @Override
     public Integer call() throws Exception {
       switch (this.value) {
       case 1:
@@ -170,20 +161,15 @@ public class RemoveSwitchMutatorTest extends MutatorTestBase {
   @Test
   public void shouldReplaceTableLabelsInt() throws Exception {
     final Mutant mutant = getFirstMutant(HasMultipleArmIntSwitchWithDefault.class);
-    assertMutantCallableReturns(new HasMultipleArmIntSwitchWithDefault(0),
-        mutant, 0);
-    assertMutantCallableReturns(new HasMultipleArmIntSwitchWithDefault(1),
-        mutant, 1);
-    assertMutantCallableReturns(new HasMultipleArmIntSwitchWithDefault(200),
-        mutant, 2);
-    assertMutantCallableReturns(new HasMultipleArmIntSwitchWithDefault(4000),
-        mutant, 0);
-    assertMutantCallableReturns(new HasMultipleArmIntSwitchWithDefault(800000),
-        mutant, 8);
+    assertMutantCallableReturns(new HasMultipleArmIntSwitchWithDefault(0), mutant, 0);
+    assertMutantCallableReturns(new HasMultipleArmIntSwitchWithDefault(1), mutant, 1);
+    assertMutantCallableReturns(new HasMultipleArmIntSwitchWithDefault(200), mutant, 2);
+    assertMutantCallableReturns(new HasMultipleArmIntSwitchWithDefault(4000), mutant, 0);
+    assertMutantCallableReturns(new HasMultipleArmIntSwitchWithDefault(800000), mutant, 8);
   }
 
   private static class HasMultipleArmIntSwitchWithoutDefault implements
-  Callable<Integer> {
+      Callable<Integer> {
 
     private final int value;
 
@@ -191,7 +177,6 @@ public class RemoveSwitchMutatorTest extends MutatorTestBase {
       this.value = value;
     }
 
-    @Override
     public Integer call() throws Exception {
       switch (this.value) {
       case 0:
@@ -210,19 +195,15 @@ public class RemoveSwitchMutatorTest extends MutatorTestBase {
   @Test
   public void shouldReplaceOtherCasesWithoutDefaultForInt() throws Exception {
     final Mutant mutant = getFirstMutant(HasMultipleArmIntSwitchWithoutDefault.class);
-    assertMutantCallableReturns(new HasMultipleArmIntSwitchWithoutDefault(0),
-        mutant, 0);
-    assertMutantCallableReturns(new HasMultipleArmIntSwitchWithoutDefault(200),
-        mutant, 2);
-    assertMutantCallableReturns(
-        new HasMultipleArmIntSwitchWithoutDefault(4000), mutant, -1);
-    assertMutantCallableReturns(new HasMultipleArmIntSwitchWithoutDefault(
-        800000), mutant, 8);
-    assertMutantCallableReturns(new HasMultipleArmIntSwitchWithoutDefault(8),
-        mutant, -1);
+    assertMutantCallableReturns(new HasMultipleArmIntSwitchWithoutDefault(0), mutant, 0);
+    assertMutantCallableReturns(new HasMultipleArmIntSwitchWithoutDefault(200), mutant, 2);
+    assertMutantCallableReturns(new HasMultipleArmIntSwitchWithoutDefault(4000), mutant, -1);
+    assertMutantCallableReturns(new HasMultipleArmIntSwitchWithoutDefault(800000), mutant, 8);
+    assertMutantCallableReturns(new HasMultipleArmIntSwitchWithoutDefault(8), mutant, -1);
   }
 
-  private static class HasFewerLabelsWithDefault implements Callable<Integer> {
+  private static class HasFewerLabelsWithDefault implements
+      Callable<Integer> {
 
     private final int value;
 
@@ -230,7 +211,6 @@ public class RemoveSwitchMutatorTest extends MutatorTestBase {
       this.value = value;
     }
 
-    @Override
     public Integer call() throws Exception {
       switch (this.value) {
       case 1:

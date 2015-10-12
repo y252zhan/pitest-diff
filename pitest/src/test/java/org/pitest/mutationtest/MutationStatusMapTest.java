@@ -1,34 +1,35 @@
 package org.pitest.mutationtest;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.pitest.mutationtest.LocationMother.aMutationId;
-import static org.pitest.mutationtest.engine.MutationDetailsMother.aMutationDetail;
+import static org.junit.matchers.JUnitMatchers.hasItems;
 
 import java.util.Arrays;
 import java.util.Collections;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.pitest.mutationtest.LocationMother.MutationIdentifierBuilder;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.pitest.mutationtest.engine.MutationDetails;
+
 
 public class MutationStatusMapTest {
 
   private MutationStatusMap testee;
 
+  @Mock
   private MutationDetails   details;
 
+  @Mock
   private MutationDetails   detailsTwo;
 
   @Before
   public void setUp() {
+    MockitoAnnotations.initMocks(this);
     this.testee = new MutationStatusMap();
-    MutationIdentifierBuilder id = aMutationId().withIndex(1);
-    this.details = aMutationDetail().withId(id.withIndex(1)).build();
-    this.detailsTwo = aMutationDetail().withId(id.withIndex(2)).build();
   }
 
   @Test
@@ -48,8 +49,8 @@ public class MutationStatusMapTest {
     this.testee.setStatusForMutations(
         Arrays.asList(this.details, this.detailsTwo),
         DetectionStatus.NOT_STARTED);
-    assertThat(this.testee.getUnrunMutations()).contains(this.details,
-        this.detailsTwo);
+    assertThat(this.testee.getUnrunMutations(),
+        hasItems(this.details, this.detailsTwo));
   }
 
   @Test
@@ -63,8 +64,8 @@ public class MutationStatusMapTest {
   public void shouldReturnUnfinishedMutationsWhenSomePresent() {
     this.testee.setStatusForMutations(
         Arrays.asList(this.details, this.detailsTwo), DetectionStatus.STARTED);
-    assertThat(this.testee.getUnfinishedRuns()).contains(this.details,
-        this.detailsTwo);
+    assertThat(this.testee.getUnfinishedRuns(),
+        hasItems(this.details, this.detailsTwo));
   }
 
   @Test
@@ -88,8 +89,8 @@ public class MutationStatusMapTest {
         statusPairTwo);
     this.testee.setStatusForMutation(this.detailsTwo, statusPairTwo);
 
-    assertThat(this.testee.createMutationResults()).contains(resultOne,
-        resultTwo);
+    assertThat(this.testee.createMutationResults(),
+        hasItems(resultOne, resultTwo));
   }
 
   @Test
@@ -112,8 +113,8 @@ public class MutationStatusMapTest {
         statusPairTwo);
     this.testee.setStatusForMutation(this.detailsTwo, statusPairTwo);
 
-    assertThat(this.testee.createMutationResults()).contains(resultOne,
-        resultTwo);
+    assertThat(this.testee.createMutationResults(),
+        hasItems(resultOne, resultTwo));
   }
 
 }

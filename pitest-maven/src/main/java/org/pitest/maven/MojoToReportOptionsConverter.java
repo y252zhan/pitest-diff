@@ -1,12 +1,12 @@
 /*
  * Copyright 2011 Henry Coles
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,34 +20,27 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Properties;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
-import org.apache.maven.model.Plugin;
-import org.apache.maven.plugin.logging.Log;
-import org.codehaus.plexus.util.xml.Xpp3Dom;
+import org.pitest.classpath.ClassPathByteArraySource;
 import org.pitest.functional.F;
 import org.pitest.functional.FCollection;
 import org.pitest.functional.predicate.Predicate;
+import org.pitest.mutationtest.config.ConfigurationFactory;
 import org.pitest.mutationtest.config.ReportOptions;
 import org.pitest.testapi.TestGroupConfig;
 import org.pitest.util.Glob;
+import org.pitest.util.Log;
 
 public class MojoToReportOptionsConverter {
 
-  private final PitMojo                 mojo;
-  private final Predicate<Artifact>     dependencyFilter;
-  private final Log                     log;
-  private final SurefireConfigConverter surefireConverter;
+  private final PitMojo mojo;
+  private final Predicate<Artifact> dependencyFilter;
 
-  public MojoToReportOptionsConverter(final PitMojo mojo,
-      SurefireConfigConverter surefireConverter,
-      Predicate<Artifact> dependencyFilter) {
+  public MojoToReportOptionsConverter(final PitMojo mojo, Predicate<Artifact> dependencyFilter) {
     this.mojo = mojo;
     this.dependencyFilter = dependencyFilter;
-    this.log = mojo.getLog();
-    this.surefireConverter = surefireConverter;
   }
 
   @SuppressWarnings("unchecked")
@@ -58,24 +51,14 @@ public class MojoToReportOptionsConverter {
     try {
       classPath.addAll(this.mojo.getProject().getTestClasspathElements());
     } catch (final DependencyResolutionRequiredException e1) {
-      this.log.info(e1);
+      this.mojo.getLog().info(e1);
     }
 
     addOwnDependenciesToClassPath(classPath);
 
     classPath.addAll(this.mojo.getAdditionalClasspathElements());
 
-    for (Object artifact : this.mojo.getProject().getArtifacts()) {
-      final Artifact dependency = (Artifact) artifact;
-
-      if (this.mojo.getClasspathDependencyExcludes().contains(
-          dependency.getGroupId() + ":" + dependency.getArtifactId())) {
-        classPath.remove(dependency.getFile().getPath());
-      }
-    }
-
-    ReportOptions option = parseReportOptions(classPath);
-    return updateFromSurefire(option);
+    return parseReportOptions(classPath);
 
   }
 
@@ -84,8 +67,9 @@ public class MojoToReportOptionsConverter {
     final ReportOptions data = new ReportOptions();
 
     if (this.mojo.getProject().getBuild() != null) {
-      this.log.info("Mutating from "
-          + this.mojo.getProject().getBuild().getOutputDirectory());
+      Log.getLogger().info(
+          "Mutating from "
+              + this.mojo.getProject().getBuild().getOutputDirectory());
       data.setCodePaths(Collections.singleton(this.mojo.getProject().getBuild()
           .getOutputDirectory()));
     }
@@ -126,7 +110,7 @@ public class MojoToReportOptionsConverter {
 
     data.addOutputFormats(determineOutputFormats());
 
-    setTestGroups(data);
+    setTestType(data);
 
     data.setMutationUnitSize(this.mojo.getMutationUnitSize());
     data.setShouldCreateTimestampedReports(this.mojo.isTimestampedReports());
@@ -137,59 +121,28 @@ public class MojoToReportOptionsConverter {
     data.setExportLineCoverage(this.mojo.isExportLineCoverage());
     data.setMutationEngine(this.mojo.getMutationEngine());
     data.setJavaExecutable(this.mojo.getJavaExecutable());
-    data.setFreeFormProperties(createPluginProperties());
 
     return data;
-  }
-
-  private ReportOptions updateFromSurefire(ReportOptions option) {
-    Collection<Plugin> plugins = lookupPlugin("org.apache.maven.plugins:maven-surefire-plugin");
-    if (!this.mojo.isParseSurefireConfig()) {
-      return option;
-    } else if (plugins.isEmpty()) {
-      this.log.warn("Could not find surefire configuration in pom");
-      return option;
-    }
-
-    Plugin surefire = plugins.iterator().next();
-    if (surefire != null) {
-      return this.surefireConverter.update(option,
-          (Xpp3Dom) surefire.getConfiguration());
-    } else {
-      return option;
-    }
-
-  }
-
-  private Collection<Plugin> lookupPlugin(String key) {
-    @SuppressWarnings("unchecked")
-    List<Plugin> plugins = this.mojo.getProject().getBuildPlugins();
-    return FCollection.filter(plugins, hasKey(key));
-  }
-
-  private static F<Plugin, Boolean> hasKey(final String key) {
-    return new F<Plugin, Boolean>() {
-      @Override
-      public Boolean apply(Plugin a) {
-        return a.getKey().equals(key);
-      }
-    };
   }
 
   private boolean shouldFailWhenNoMutations() {
     return this.mojo.isFailWhenNoMutations();
   }
 
-  private void setTestGroups(final ReportOptions data) {
+  private void setTestType(final ReportOptions data) {
     final TestGroupConfig conf = new TestGroupConfig(
-        this.mojo.getExcludedGroups(), this.mojo.getIncludedGroups());
+        this.mojo.getExcludedGroups(),
+        this.mojo.getIncludedGroups());
+    final ConfigurationFactory configFactory = new ConfigurationFactory(conf,
+        new ClassPathByteArraySource(data.getClassPath()));
+
     data.setGroupConfig(conf);
+    data.setConfiguration(configFactory.createConfiguration());
+
   }
 
   private void addOwnDependenciesToClassPath(final List<String> classPath) {
     for (final Artifact dependency : filteredDependencies()) {
-      this.log.info("Adding " + dependency.getGroupId() + ":"
-          + dependency.getArtifactId() + " to SUT classpath");
       classPath.add(dependency.getFile().getAbsolutePath());
     }
   }
@@ -204,8 +157,8 @@ public class MojoToReportOptionsConverter {
   }
 
   private Collection<Artifact> filteredDependencies() {
-    return FCollection.filter(this.mojo.getPluginArtifactMap().values(),
-        this.dependencyFilter);
+    return FCollection
+        .filter(this.mojo.getPluginArtifactMap().values(), dependencyFilter);
   }
 
   private Collection<String> determineMutators() {
@@ -237,7 +190,6 @@ public class MojoToReportOptionsConverter {
 
   private F<String, File> stringToFile() {
     return new F<String, File>() {
-      @Override
       public File apply(final String a) {
         return new File(a);
       }
@@ -255,14 +207,6 @@ public class MojoToReportOptionsConverter {
 
   private boolean hasValue(final Collection<?> collection) {
     return (collection != null) && !collection.isEmpty();
-  }
-
-  private Properties createPluginProperties() {
-    Properties p = new Properties();
-    if (this.mojo.getPluginProperties() != null) {
-      p.putAll(this.mojo.getPluginProperties());
-    }
-    return p;
   }
 
 }

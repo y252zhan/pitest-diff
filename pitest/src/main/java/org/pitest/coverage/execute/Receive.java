@@ -1,17 +1,13 @@
 package org.pitest.coverage.execute;
 
-import java.util.Collection;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.pitest.classinfo.ClassName;
-import org.pitest.coverage.BlockLocation;
+
+import org.pitest.coverage.ClassStatistics;
 import org.pitest.coverage.CoverageResult;
 import org.pitest.functional.SideEffect1;
-import org.pitest.mutationtest.engine.Location;
-import org.pitest.mutationtest.engine.MethodName;
 import org.pitest.testapi.Description;
 import org.pitest.util.Id;
 import org.pitest.util.ReceiveStrategy;
@@ -21,25 +17,19 @@ import sun.pitest.CodeCoverageStore;
 
 final class Receive implements ReceiveStrategy {
 
-  private final Map<Integer, ClassName>     classIdToName = new ConcurrentHashMap<Integer, ClassName>();
-  private final Map<Long, BlockLocation>    probeToBlock  = new ConcurrentHashMap<Long, BlockLocation>();
-
+  private final Map<Integer, String>        classIdToName = new ConcurrentHashMap<Integer, String>();
   private final SideEffect1<CoverageResult> handler;
 
   Receive(final SideEffect1<CoverageResult> handler) {
     this.handler = handler;
   }
 
-  @Override
   public void apply(final byte control, final SafeDataInputStream is) {
     switch (control) {
     case Id.CLAZZ:
       final int id = is.readInt();
       final String name = is.readString();
-      this.classIdToName.put(id, ClassName.fromString(name));
-      break;
-    case Id.PROBES:
-      handleProbes(is);
+      this.classIdToName.put(id, name);
       break;
     case Id.OUTCOME:
       handleTestEnd(is);
@@ -49,53 +39,47 @@ final class Receive implements ReceiveStrategy {
     }
   }
 
-  private void handleProbes(final SafeDataInputStream is) {
-    final int classId = is.readInt();
-    final String methodName = is.readString();
-    final String methodSig = is.readString();
-    final int first = is.readInt();
-    final int last = is.readInt();
-    Location loc = Location.location(this.classIdToName.get(classId),
-        MethodName.fromString(methodName), methodSig);
-    for (int i = first; i != (last + 1); i++) {
-      // nb, convert from classwide id to method scoped index within
-      // BlockLocation
-      this.probeToBlock.put(CodeCoverageStore.encode(classId, i),
-          new BlockLocation(loc, i - first));
-    }
-  }
-
   private void handleTestEnd(final SafeDataInputStream is) {
     final Description d = is.read(Description.class);
-    final int numberOfResults = is.readInt();
+    final long numberOfResults = is.readLong();
 
-    final Set<BlockLocation> hits = new HashSet<BlockLocation>(numberOfResults);
+    final Map<Integer, ClassStatistics> hits = new HashMap<Integer, ClassStatistics>();
 
     for (int i = 0; i != numberOfResults; i++) {
-      readProbeHit(is, hits);
+      readLineHit(is, hits);
     }
 
     this.handler.apply(createCoverageResult(is, d, hits));
   }
 
-  private void readProbeHit(final SafeDataInputStream is,
-      final Set<BlockLocation> hits) {
+  private void readLineHit(final SafeDataInputStream is,
+      final Map<Integer, ClassStatistics> hits) {
     final long encoded = is.readLong();
-    BlockLocation location = probeToBlock(encoded);
-    hits.add(location);
-  }
+    final int classId = CodeCoverageStore.decodeClassId(encoded);
+    final int lineNumber = CodeCoverageStore.decodeLineId(encoded);
 
-  private BlockLocation probeToBlock(long encoded) {
-    return this.probeToBlock.get(encoded);
+    final ClassStatistics stats = getStatisticsForClass(hits, classId);
+
+    stats.registerLineVisit(lineNumber);
   }
 
   private CoverageResult createCoverageResult(final SafeDataInputStream is,
-      final Description d, Collection<BlockLocation> visitedBlocks) {
+      final Description d, final Map<Integer, ClassStatistics> hits) {
     final boolean isGreen = is.readBoolean();
     final int executionTime = is.readInt();
     final CoverageResult cr = new CoverageResult(d, executionTime, isGreen,
-        visitedBlocks);
+        hits.values());
     return cr;
+  }
+
+  private ClassStatistics getStatisticsForClass(
+      final Map<Integer, ClassStatistics> hits, final int classId) {
+    ClassStatistics stats = hits.get(classId);
+    if (stats == null) {
+      stats = new ClassStatistics(this.classIdToName.get(classId));
+      hits.put(classId, stats);
+    }
+    return stats;
   }
 
 }

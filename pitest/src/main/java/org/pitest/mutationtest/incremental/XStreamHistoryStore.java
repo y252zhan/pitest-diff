@@ -33,9 +33,9 @@ import com.thoughtworks.xstream.io.xml.CompactWriter;
 public class XStreamHistoryStore implements HistoryStore {
 
   private static final Logger                                   LOG               = Log
-      .getLogger();
+                                                                                      .getLogger();
 
-  private static final XStream                                  XSTREAM_INSTANCE  = configureXStream();
+  private final static XStream                                  XSTREAM_INSTANCE  = configureXStream();
 
   private final WriterFactory                                   outputFactory;
   private final BufferedReader                                  input;
@@ -74,7 +74,6 @@ public class XStreamHistoryStore implements HistoryStore {
     return null;
   }
 
-  @Override
   public void recordClassPath(final Collection<HierarchicalClassId> ids,
       final CoverageDatabase coverageInfo) {
     final PrintWriter output = this.outputFactory.create();
@@ -87,7 +86,6 @@ public class XStreamHistoryStore implements HistoryStore {
     output.flush();
   }
 
-  @Override
   public void recordResult(final MutationResult result) {
     final PrintWriter output = this.outputFactory.create();
     output.println(toXml(new IdResult(result.getDetails().getId(), result
@@ -95,17 +93,14 @@ public class XStreamHistoryStore implements HistoryStore {
     output.flush();
   }
 
-  @Override
   public Map<MutationIdentifier, MutationStatusTestPair> getHistoricResults() {
     return this.previousResults;
   }
 
-  @Override
   public Map<ClassName, ClassHistory> getHistoricClassPath() {
     return this.previousClassPath;
   }
 
-  @Override
   public void initialize() {
     if (this.input != null) {
       restoreClassPath();

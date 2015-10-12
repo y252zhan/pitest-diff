@@ -4,11 +4,15 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.when;
 
+import java.util.Collections;
+
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.pitest.coverage.CoverageResult;
+import org.pitest.coverage.execute.Receive;
 import org.pitest.functional.SideEffect1;
 import org.pitest.testapi.Description;
 import org.pitest.util.Id;
@@ -16,7 +20,6 @@ import org.pitest.util.SafeDataInputStream;
 
 import sun.pitest.CodeCoverageStore;
 
-// does this test add any value?
 public class ReceiveTest {
 
   private Receive                     testee;
@@ -40,7 +43,6 @@ public class ReceiveTest {
 
   private SideEffect1<CoverageResult> stubHandler() {
     return new SideEffect1<CoverageResult>() {
-      @Override
       public void apply(final CoverageResult a) {
         ReceiveTest.this.result = a;
       }
@@ -51,6 +53,16 @@ public class ReceiveTest {
   public void shouldReportNoCoverageWhenNoTestsRun() {
     this.testee.apply(Id.DONE, this.is);
     assertNull(this.result);
+  }
+
+  @Test
+  public void shouldReportCoverageWhenLineHitByTest() {
+    final int lineNumber = 42;
+    recordTestCoverage(0, 0, lineNumber, true);
+
+    assertEquals(1, this.result.getCoverage().size());
+    assertEquals(Collections.singleton(lineNumber), this.result.getCoverage()
+        .iterator().next().getUniqueVisitedLines());
   }
 
   @Test
@@ -65,16 +77,23 @@ public class ReceiveTest {
     assertEquals(true, this.result.isGreenTest());
   }
 
+  @Test
+  public void shouldReportExectionTime() {
+    final int executionTime = 1000;
+    recordTestCoverage(executionTime, 0, 0, true);
+
+    assertEquals(executionTime, this.result.getExecutionTime());
+  }
+
   private void recordTestCoverage(final int executionTime, final int classId,
-      final int probeNumber, final boolean testPassed) {
+      final int lineNumber, final boolean testPassed) {
     when(this.is.readInt()).thenReturn(classId, executionTime);
     when(this.is.readString()).thenReturn("foo");
     this.testee.apply(Id.CLAZZ, this.is);
 
     when(this.is.read(Description.class)).thenReturn(this.description);
-    when(this.is.readInt()).thenReturn(1);
     when(this.is.readLong()).thenReturn(1l,
-        CodeCoverageStore.encode(classId, probeNumber));
+        CodeCoverageStore.encode(classId, lineNumber));
     when(this.is.readBoolean()).thenReturn(testPassed);
     this.testee.apply(Id.OUTCOME, this.is);
   }

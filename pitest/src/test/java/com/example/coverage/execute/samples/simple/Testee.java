@@ -8,7 +8,6 @@ public class Testee implements Runnable {
 
   }
 
-  @Override
   public void run() {
     new Testee2().bar();
   }

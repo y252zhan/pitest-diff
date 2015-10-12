@@ -14,13 +14,6 @@
  */
 package org.pitest.mutationtest.engine.gregor;
 
-import static org.junit.Assert.assertEquals;
-
-import java.text.MessageFormat;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-
 import org.junit.experimental.theories.DataPoints;
 import org.junit.experimental.theories.Theories;
 import org.junit.experimental.theories.Theory;
@@ -32,43 +25,53 @@ import org.pitest.mutationtest.engine.gregor.inlinedcode.InlinedCodeFilter;
 import org.pitest.mutationtest.engine.gregor.inlinedcode.InlinedFinallyBlockDetector;
 import org.pitest.util.ResourceFolderByteArraySource;
 
+import java.text.MessageFormat;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+
+import static org.junit.Assert.assertEquals;
+
 /**
- * @author Artem Khvastunov &lt;contact@artspb.me&gt;
+ * @author Artem Khvastunov <contact@artspb.me>
  */
 @RunWith(Theories.class)
 public class TestTryWithResources extends MutatorTestBase {
 
-  private static final Collection<String> COMPILERS = Arrays.asList("javac",
-                                                        "ecj", "aspectj");
-  private static final String             PATH      = "trywithresources/{0}_{1}";
-  private static final String             MESSAGE   = "class={0}, compiler={1}";
+    private static final Collection<String> COMPILERS = Arrays.asList("javac", "ecj", "aspectj");
+    private static final String PATH = "trywithresources/{0}_{1}";
+    private static final String MESSAGE = "class={0}, compiler={1}";
 
-  @DataPoints
-  public static String[][]                data      = new String[][] {
-      { "1", "TryExample" }, { "2", "TryCatchExample" },
-      { "3", "TryCatchFinallyExample" }, { "2", "TryFinallyExample" },
-      { "1", "TryWithTwoCloseableExample" },
-      { "1", "TryWithNestedTryExample" }, { "1", "TryWithInterfaceExample" } };
+    @DataPoints
+    public static String[][] data = new String[][]{
+            {"1", "TryExample"},
+            {"2", "TryCatchExample"},
+            {"3", "TryCatchFinallyExample"},
+            {"2", "TryFinallyExample"},
+            {"1", "TryWithTwoCloseableExample"},
+            {"1", "TryWithNestedTryExample"}
+    };
 
-  @Theory
-  public void testTryWithResourcesMutationsWithFilter(String... data) {
-    createEngine(new InlinedFinallyBlockDetector());
-    testWithExpected(data[0], data[1]);
-  }
-
-  private void createEngine(InlinedCodeFilter inlinedCodeDetector) {
-    this.engine = new GregorMutater(new ResourceFolderByteArraySource(),
-        True.<MethodInfo> all(), Mutator.defaults(),
-        Collections.<String> emptyList(), inlinedCodeDetector);
-  }
-
-  private void testWithExpected(String expected, String className) {
-    for (String compiler : COMPILERS) {
-      String clazz = MessageFormat.format(PATH, className, compiler);
-      final Collection<MutationDetails> actualDetails = findMutationsFor(clazz);
-      String message = MessageFormat.format(MESSAGE, className, compiler);
-      assertEquals(message, Long.valueOf(expected),
-          Long.valueOf(actualDetails.size()));
+    @Theory
+    public void testTryWithResourcesMutationsWithFilter(String... data) {
+        createEngine(new InlinedFinallyBlockDetector());
+        testWithExpected(data[0], data[1]);
     }
-  }
+
+    private void createEngine(InlinedCodeFilter inlinedCodeDetector) {
+        this.engine = new GregorMutater(new ResourceFolderByteArraySource(),
+                True.<MethodInfo>all(),
+                Mutator.defaults(),
+                Collections.<String>emptyList(),
+                inlinedCodeDetector);
+    }
+
+    private void testWithExpected(String expected, String className) {
+        for (String compiler : COMPILERS) {
+            String clazz = MessageFormat.format(PATH, className, compiler);
+            final Collection<MutationDetails> actualDetails = findMutationsFor(clazz);
+            String message = MessageFormat.format(MESSAGE, className, compiler);
+            assertEquals(message, Long.valueOf(expected), Long.valueOf(actualDetails.size()));
+        }
+    }
 }

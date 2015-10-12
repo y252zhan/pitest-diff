@@ -4,6 +4,6 @@ import org.pitest.classpath.CodeSource;
 
 public interface BuildVerifier {
 
-  void verify(CodeSource coverageDatabase);
+  public void verify(CodeSource coverageDatabase);
 
 }

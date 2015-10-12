@@ -33,13 +33,11 @@ public class DefaultCodeHistory implements CodeHistory {
     this.previousClassPath = previousClassPath;
   }
 
-  @Override
   public Option<MutationStatusTestPair> getPreviousResult(
       final MutationIdentifier id) {
     return Option.some(this.previousResults.get(id));
   }
 
-  @Override
   public boolean hasClassChanged(final ClassName className) {
     final ClassHistory historic = this.previousClassPath.get(className);
     if (historic == null) {
@@ -51,7 +49,6 @@ public class DefaultCodeHistory implements CodeHistory {
 
   }
 
-  @Override
   public boolean hasCoverageChanged(final ClassName className,
       final BigInteger currentCoverage) {
     return !this.previousClassPath.get(className).getCoverageId()

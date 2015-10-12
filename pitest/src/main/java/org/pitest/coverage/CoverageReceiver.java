@@ -1,14 +1,15 @@
 package org.pitest.coverage;
 
+
 import org.pitest.testapi.Description;
 
 import sun.pitest.InvokeReceiver;
 
 public interface CoverageReceiver extends InvokeReceiver {
 
-  void newTest();
+  public abstract void newTest();
 
-  void recordTestOutcome(Description description, boolean wasGreen,
-      int executionTime);
+  public abstract void recordTestOutcome(Description description,
+      boolean wasGreen, int executionTime);
 
 }

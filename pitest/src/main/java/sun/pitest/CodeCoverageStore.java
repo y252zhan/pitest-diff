@@ -2,14 +2,14 @@
  * Originally based on http://code.google.com/p/javacoveragent/ by
  * "alex.mq0" and "dmitry.kandalov" - but don't think anything of the original
  * now remains in terms of either code or design.
- *
- *
+ * 
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -31,17 +31,17 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public final class CodeCoverageStore {
 
-  private static final int                     CLASS_HIT_INDEX   = 0;
+  private final static int                     CLASS_HIT_INDEX         = 0;
 
-  public static final String                   CLASS_NAME        = CodeCoverageStore.class
-                                                                     .getName()
-                                                                     .replace(
-                                                                         '.',
-                                                                         '/');
-  public static final String                   PROBE_METHOD_NAME = "visitProbes";
+  public static final String                   CLASS_NAME              = CodeCoverageStore.class
+                                                                           .getName()
+                                                                           .replace(
+                                                                               '.',
+                                                                               '/');
+  public static final String                   PROBE_METHOD_NAME       = "visitProbes";
 
   private static InvokeReceiver                invokeQueue;
-  private static int                           classId           = 0;
+  private static int                           classId                 = 0;
 
   // array of probe hits, first slot indicates any hits to the class.
   // testing suggests boolean array with synchronization to ensure happens
@@ -49,7 +49,11 @@ public final class CodeCoverageStore {
   // both AtomicInteger array with bit per flag and integer per flag.
   // optimisation with other methods of ensuring a happens before not yet
   // investigated
-  private static final Map<Integer, boolean[]> CLASS_HITS        = new ConcurrentHashMap<Integer, boolean[]>();
+  private final static Map<Integer, boolean[]> classHits               = new ConcurrentHashMap<Integer, boolean[]>();
+
+  // encoded classid/methodid map to array of line numbers indexed by probe
+  // index
+  private final static Map<Integer, int[]>     classProbeToLineMapping = new ConcurrentHashMap<Integer, int[]>();
 
   public static void init(final InvokeReceiver invokeQueue) {
     CodeCoverageStore.invokeQueue = invokeQueue;
@@ -58,15 +62,15 @@ public final class CodeCoverageStore {
   private CodeCoverageStore() {
   }
 
-  public static void visitSingleProbe(final int classId, final int probe) { // NO_UCD
-    final boolean[] bs = CLASS_HITS.get(classId);
+  public static void visitSingleProbe(final int classId, final int probe) {
+    final boolean[] bs = classHits.get(classId);
     bs[CLASS_HIT_INDEX] = true;
     bs[probe + 1] = true;
   }
 
   public static void visitProbes(final int classId, final int offset,
       final boolean[] probes) { // NO_UCD
-    final boolean[] bs = CLASS_HITS.get(classId);
+    final boolean[] bs = classHits.get(classId);
     bs[CLASS_HIT_INDEX] = true;
     for (int i = 0; i != probes.length; i++) {
       if (probes[i]) {
@@ -76,15 +80,15 @@ public final class CodeCoverageStore {
   }
 
   // ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  //
-  // Overloaded special case implementations for methods with 1 to N probes.
+  // /
+  // / Overloaded special case implementations for methods with 1 to N probes.
   // Allows probes to be implemented as
-  // local variables and the loop in the array based version to be unrolled.
-  //
+  // / local variables and the loop in the array based version to be unrolled.
+  // /
 
   public static void visitProbes(final int classId, final int offset,
       final boolean p0) { // NO_UCD
-    final boolean[] bs = CLASS_HITS.get(classId);
+    final boolean[] bs = classHits.get(classId);
     bs[CLASS_HIT_INDEX] = true;
     if (p0) {
       bs[offset + 1] = true;
@@ -93,7 +97,7 @@ public final class CodeCoverageStore {
 
   public static void visitProbes(final int classId, final int offset,
       final boolean p0, final boolean p1) { // NO_UCD
-    final boolean[] bs = CLASS_HITS.get(classId);
+    final boolean[] bs = classHits.get(classId);
     bs[CLASS_HIT_INDEX] = true;
     if (p0) {
       bs[offset + 1] = true;
@@ -105,7 +109,7 @@ public final class CodeCoverageStore {
 
   public static void visitProbes(final int classId, final int offset,
       final boolean p0, final boolean p1, final boolean p2) { // NO_UCD
-    final boolean[] bs = CLASS_HITS.get(classId);
+    final boolean[] bs = classHits.get(classId);
     bs[CLASS_HIT_INDEX] = true;
     if (p0) {
       bs[offset + 1] = true;
@@ -120,7 +124,7 @@ public final class CodeCoverageStore {
 
   public static void visitProbes(final int classId, final int offset,
       final boolean p0, final boolean p1, final boolean p2, final boolean p3) { // NO_UCD
-    final boolean[] bs = CLASS_HITS.get(classId);
+    final boolean[] bs = classHits.get(classId);
     bs[CLASS_HIT_INDEX] = true;
     if (p0) {
       bs[offset + 1] = true;
@@ -139,7 +143,7 @@ public final class CodeCoverageStore {
   public static void visitProbes(final int classId, final int offset,
       final boolean p0, final boolean p1, final boolean p2, final boolean p3,
       final boolean p4) { // NO_UCD
-    final boolean[] bs = CLASS_HITS.get(classId);
+    final boolean[] bs = classHits.get(classId);
     bs[CLASS_HIT_INDEX] = true;
     if (p0) {
       bs[offset + 1] = true;
@@ -161,7 +165,7 @@ public final class CodeCoverageStore {
   public static void visitProbes(final int classId, final int offset,
       final boolean p0, final boolean p1, final boolean p2, final boolean p3,
       final boolean p4, final boolean p5) { // NO_UCD
-    final boolean[] bs = CLASS_HITS.get(classId);
+    final boolean[] bs = classHits.get(classId);
     bs[CLASS_HIT_INDEX] = true;
     if (p0) {
       bs[offset + 1] = true;
@@ -186,7 +190,7 @@ public final class CodeCoverageStore {
   public static void visitProbes(final int classId, final int offset,
       final boolean p0, final boolean p1, final boolean p2, final boolean p3,
       final boolean p4, final boolean p5, final boolean p6) { // NO_UCD
-    final boolean[] bs = CLASS_HITS.get(classId);
+    final boolean[] bs = classHits.get(classId);
     bs[CLASS_HIT_INDEX] = true;
     if (p0) {
       bs[offset + 1] = true;
@@ -214,7 +218,7 @@ public final class CodeCoverageStore {
   public static void visitProbes(final int classId, final int offset,
       final boolean p0, final boolean p1, final boolean p2, final boolean p3,
       final boolean p4, final boolean p5, final boolean p6, final boolean p7) { // NO_UCD
-    final boolean[] bs = CLASS_HITS.get(classId);
+    final boolean[] bs = classHits.get(classId);
     bs[CLASS_HIT_INDEX] = true;
     if (p0) {
       bs[offset + 1] = true;
@@ -246,7 +250,7 @@ public final class CodeCoverageStore {
       final boolean p0, final boolean p1, final boolean p2, final boolean p3,
       final boolean p4, final boolean p5, final boolean p6, final boolean p7,
       final boolean p8) { // NO_UCD
-    final boolean[] bs = CLASS_HITS.get(classId);
+    final boolean[] bs = classHits.get(classId);
     bs[CLASS_HIT_INDEX] = true;
     if (p0) {
       bs[offset + 1] = true;
@@ -281,7 +285,7 @@ public final class CodeCoverageStore {
       final boolean p0, final boolean p1, final boolean p2, final boolean p3,
       final boolean p4, final boolean p5, final boolean p6, final boolean p7,
       final boolean p8, final boolean p9) { // NO_UCD
-    final boolean[] bs = CLASS_HITS.get(classId);
+    final boolean[] bs = classHits.get(classId);
     bs[CLASS_HIT_INDEX] = true;
     if (p0) {
       bs[offset + 1] = true;
@@ -319,7 +323,7 @@ public final class CodeCoverageStore {
       final boolean p0, final boolean p1, final boolean p2, final boolean p3,
       final boolean p4, final boolean p5, final boolean p6, final boolean p7,
       final boolean p8, final boolean p9, final boolean p10) { // NO_UCD
-    final boolean[] bs = CLASS_HITS.get(classId);
+    final boolean[] bs = classHits.get(classId);
     bs[CLASS_HIT_INDEX] = true;
     if (p0) {
       bs[offset + 1] = true;
@@ -360,7 +364,7 @@ public final class CodeCoverageStore {
       final boolean p0, final boolean p1, final boolean p2, final boolean p3,
       final boolean p4, final boolean p5, final boolean p6, final boolean p7,
       final boolean p8, final boolean p9, final boolean p10, final boolean p11) { // NO_UCD
-    final boolean[] bs = CLASS_HITS.get(classId);
+    final boolean[] bs = classHits.get(classId);
     bs[CLASS_HIT_INDEX] = true;
     if (p0) {
       bs[offset + 1] = true;
@@ -405,7 +409,7 @@ public final class CodeCoverageStore {
       final boolean p4, final boolean p5, final boolean p6, final boolean p7,
       final boolean p8, final boolean p9, final boolean p10, final boolean p11,
       final boolean p12) { // NO_UCD
-    final boolean[] bs = CLASS_HITS.get(classId);
+    final boolean[] bs = classHits.get(classId);
     bs[CLASS_HIT_INDEX] = true;
     if (p0) {
       bs[offset + 1] = true;
@@ -453,7 +457,7 @@ public final class CodeCoverageStore {
       final boolean p4, final boolean p5, final boolean p6, final boolean p7,
       final boolean p8, final boolean p9, final boolean p10, final boolean p11,
       final boolean p12, final boolean p13) { // NO_UCD
-    final boolean[] bs = CLASS_HITS.get(classId);
+    final boolean[] bs = classHits.get(classId);
     bs[CLASS_HIT_INDEX] = true;
     if (p0) {
       bs[offset + 1] = true;
@@ -504,7 +508,7 @@ public final class CodeCoverageStore {
       final boolean p4, final boolean p5, final boolean p6, final boolean p7,
       final boolean p8, final boolean p9, final boolean p10, final boolean p11,
       final boolean p12, final boolean p13, final boolean p14) { // NO_UCD
-    final boolean[] bs = CLASS_HITS.get(classId);
+    final boolean[] bs = classHits.get(classId);
     bs[CLASS_HIT_INDEX] = true;
     if (p0) {
       bs[offset + 1] = true;
@@ -553,29 +557,29 @@ public final class CodeCoverageStore {
     }
   }
 
-  public static synchronized void reset() {
-    for (final Entry<Integer, boolean[]> each : CLASS_HITS.entrySet()) {
-      CLASS_HITS.put(each.getKey(), new boolean[each.getValue().length]);
+  public synchronized static void reset() {
+    for (final Entry<Integer, boolean[]> each : classHits.entrySet()) {
+      classHits.put(each.getKey(), new boolean[each.getValue().length]);
     }
   }
 
-  public static synchronized Collection<Long> getHits() {
-    final Collection<Long> blockHits = new ArrayList<Long>();
-    for (final Entry<Integer, boolean[]> each : CLASS_HITS.entrySet()) {
+  public synchronized static Collection<Long> getHits() {
+    final Collection<Long> lineHits = new ArrayList<Long>();
+    for (final Entry<Integer, boolean[]> each : classHits.entrySet()) {
       final boolean[] bs = each.getValue();
       // first entry tracks if class has been visited at all
       if (!bs[CLASS_HIT_INDEX]) {
         continue;
       }
       final int classId = each.getKey();
-      // final int[] mapping = classProbeToBlockMapping.get(classId);
+      final int[] mapping = classProbeToLineMapping.get(classId);
       for (int probeId = 1; probeId != bs.length; probeId++) {
         if (bs[probeId]) {
-          blockHits.add(encode(classId, probeId - 1));
+          lineHits.add(encode(classId, mapping[probeId - 1]));
         }
       }
     }
-    return blockHits;
+    return lineHits;
   }
 
   public static int registerClass(final String className) {
@@ -584,13 +588,7 @@ public final class CodeCoverageStore {
     return id;
   }
 
-  public static void registerMethod(final int clazz, final String methodName,
-      final String methodDesc, final int firstProbe, final int lastProbe) {
-    invokeQueue.registerProbes(clazz, methodName, methodDesc, firstProbe,
-        lastProbe);
-  }
-
-  private static synchronized int nextId() {
+  private synchronized static int nextId() {
     return classId++;
   }
 
@@ -606,12 +604,15 @@ public final class CodeCoverageStore {
     return ((long) classId << 32) | line;
   }
 
-  public static void registerClassProbes(final int classId, int probeCount) {
-    CLASS_HITS.put(classId, new boolean[probeCount + 1]);
+  public static void registerClassProbes(final int classId,
+      final int[] probeToLines) {
+    classHits.put(classId, new boolean[probeToLines.length + 1]);
+    classProbeToLineMapping.put(classId, probeToLines);
   }
 
   public static void resetAllStaticState() {
-    CLASS_HITS.clear();
+    classHits.clear();
+    classProbeToLineMapping.clear();
   }
 
 }

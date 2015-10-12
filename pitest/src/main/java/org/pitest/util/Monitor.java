@@ -2,8 +2,8 @@ package org.pitest.util;
 
 public interface Monitor {
 
-  void requestStop();
+  public abstract void requestStop();
 
-  void requestStart();
+  public abstract void requestStart();
 
 }

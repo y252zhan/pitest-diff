@@ -1,68 +1,53 @@
 package org.pitest.mutationtest;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.pitest.mutationtest.LocationMother.aMutationId;
-import static org.pitest.mutationtest.engine.MutationDetailsMother.aMutationDetail;
+import static org.junit.Assert.assertEquals;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 
-import nl.jqno.equalsverifier.EqualsVerifier;
-
 import org.junit.Test;
 import org.pitest.classinfo.ClassName;
 import org.pitest.mutationtest.engine.Location;
 import org.pitest.mutationtest.engine.MethodName;
 import org.pitest.mutationtest.engine.MutationDetails;
+import org.pitest.mutationtest.engine.MutationIdentifier;
 
 public class MutationMetaDataTest {
 
   @Test
   public void shouldPartitionResultsByMutatedClass() {
-    MutationResult a = makeResult("Foo", "a");
-    MutationResult b = makeResult("Bar", "a");
-    MutationResult c = makeResult("Foo", "b");
-    MutationResult d = makeResult("Foo", "c");
-
-    MutationMetaData testee = new MutationMetaData(Arrays.asList(a, b, c, d));
+    MutationResult a = makeResult("Foo", "a"); 
+    MutationResult b = makeResult("Bar", "a"); 
+    MutationResult c = makeResult("Foo", "b"); 
+    MutationResult d = makeResult("Foo", "c"); 
+    
+    MutationMetaData testee = new MutationMetaData(Arrays.asList(a,b,c,d));
     Collection<ClassMutationResults> actual = testee.toClassResults();
-
-    assertThat(actual).hasSize(2);
-
+    assertEquals(2,actual.size());
     Iterator<ClassMutationResults> it = actual.iterator();
     ClassMutationResults first = it.next();
+    assertEquals(ClassName.fromString("Bar"),first.getMutatedClass());
+    assertEquals(1,first.getMutations().size());
     ClassMutationResults second = it.next();
-
-    assertThat(first.getMutatedClass()).isEqualTo(ClassName.fromString("Bar"));
-    assertThat(first.getMutations()).hasSize(1);
-
-    assertThat(second.getMutatedClass()).isEqualTo(ClassName.fromString("Foo"));
-    assertThat(second.getMutations()).hasSize(3);
-
+    assertEquals(ClassName.fromString("Foo"),second.getMutatedClass());
+    assertEquals(3,second.getMutations().size());
   }
 
   @Test
   public void shouldNotCreateEmptyClassResultsObjects() {
-    MutationMetaData testee = new MutationMetaData(
-        Collections.<MutationResult> emptyList());
-    assertThat(testee.toClassResults()).isEmpty();
+    MutationMetaData testee = new MutationMetaData(Collections.<MutationResult>emptyList());
+    assertEquals(0,testee.toClassResults().size());
   }
-
-  @Test
-  public void shouldObeyHashcodeEqualsContract() {
-    EqualsVerifier.forClass(MutationMetaData.class).verify();
-  }
-
+  
   private MutationResult makeResult(String clazz, String method) {
-    Location location = Location.location(ClassName.fromString(clazz),
-        MethodName.fromString(method), "()V");
-    MutationDetails md = aMutationDetail().withId(
-        aMutationId().withLocation(location)).build();
-    final MutationResult mr = new MutationResult(md,
-        new MutationStatusTestPair(0, DetectionStatus.KILLED));
+    Location location = Location.location(ClassName.fromString(clazz), MethodName.fromString(method), "()V");
+    MutationIdentifier id =  new MutationIdentifier(location,1,"mutator");
+    MutationDetails md = new MutationDetails(id, "file", "desc", 42, 0);
+    final MutationResult mr = new MutationResult(md, new MutationStatusTestPair(0,
+            DetectionStatus.KILLED));
     return mr;
   }
-
+  
 }

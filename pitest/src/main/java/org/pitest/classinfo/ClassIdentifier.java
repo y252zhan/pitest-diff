@@ -1,6 +1,6 @@
 package org.pitest.classinfo;
 
-public final class ClassIdentifier {
+public class ClassIdentifier {
 
   private final long      hash;
   private final ClassName name;

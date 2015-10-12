@@ -1,12 +1,12 @@
 /*
  * Copyright 2011 Henry Coles
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,18 +14,15 @@
  */
 package org.pitest.classinfo;
 
-import java.util.logging.Logger;
+import java.io.Serializable;
 
 import org.pitest.functional.F;
-import org.pitest.functional.Option;
-import org.pitest.util.IsolationUtils;
-import org.pitest.util.Log;
 
-public final class ClassName implements Comparable<ClassName> {
+public final class ClassName implements Serializable, Comparable<ClassName> {
 
-  private static final Logger LOG = Log.getLogger();
+  private static final long serialVersionUID = 1L;
 
-  private final String        name;
+  private final String      name;
 
   public ClassName(final String name) {
     this.name = name.replace('.', '/').intern();
@@ -86,42 +83,9 @@ public final class ClassName implements Comparable<ClassName> {
 
   public static F<String, ClassName> stringToClassName() {
     return new F<String, ClassName>() {
-      @Override
+
       public ClassName apply(final String clazz) {
         return ClassName.fromString(clazz);
-      }
-    };
-  }
-
-  public static F<ClassName, Option<Class<?>>> nameToClass() {
-    return nameToClass(IsolationUtils.getContextClassLoader());
-  }
-
-  public static F<ClassName, Option<Class<?>>> nameToClass(
-      final ClassLoader loader) {
-    return new F<ClassName, Option<Class<?>>>() {
-
-      @Override
-      public Option<Class<?>> apply(final ClassName className) {
-        try {
-          final Class<?> clazz = Class.forName(className.asJavaName(), false,
-              loader);
-          return Option.<Class<?>> some(clazz);
-        } catch (final ClassNotFoundException e) {
-          LOG.warning("Could not load " + className
-              + " (ClassNotFoundException: " + e.getMessage() + ")");
-          return Option.none();
-        } catch (final NoClassDefFoundError e) {
-          LOG.warning("Could not load " + className
-              + " (NoClassDefFoundError: " + e.getMessage() + ")");
-          return Option.none();
-        } catch (final LinkageError e) {
-          LOG.warning("Could not load " + className + " " + e.getMessage());
-          return Option.none();
-        } catch (final SecurityException e) {
-          LOG.warning("Could not load " + className + " " + e.getMessage());
-          return Option.none();
-        }
       }
 
     };
@@ -163,7 +127,6 @@ public final class ClassName implements Comparable<ClassName> {
     return asJavaName();
   }
 
-  @Override
   public int compareTo(final ClassName o) {
     return this.asJavaName().compareTo(o.asJavaName());
   }

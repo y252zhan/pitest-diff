@@ -1,12 +1,12 @@
 /*
  * Copyright 2010 Henry Coles
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,6 +21,7 @@ import java.util.jar.Attributes;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
 import java.util.zip.ZipEntry;
+
 
 import org.pitest.boot.HotSwapAgent;
 import org.pitest.classinfo.ClassByteArraySource;
@@ -42,8 +43,8 @@ public class JarCreatingJarFinder implements JavaAgent {
   protected static final String      CAN_SET_NATIVE_METHOD = "Can-Set-Native-Method-Prefix";
   protected static final String      BOOT_CLASSPATH        = "Boot-Class-Path";
 
-  private static final String        AGENT_CLASS_NAME      = HotSwapAgent.class
-      .getName();
+  private final static String        AGENT_CLASS_NAME      = HotSwapAgent.class
+                                                               .getName();
 
   private Option<String>             location              = Option.none();
 
@@ -57,7 +58,6 @@ public class JarCreatingJarFinder implements JavaAgent {
     this(new ClassPathByteArraySource());
   }
 
-  @Override
   public Option<String> getJarLocation() {
     if (this.location.hasNone()) {
       this.location = createJar();
@@ -89,7 +89,7 @@ public class JarCreatingJarFinder implements JavaAgent {
       global.put(Attributes.Name.MANIFEST_VERSION, "1.0");
     }
     final File mylocation = new File(location);
-    global.putValue(BOOT_CLASSPATH, getBootClassPath(mylocation));
+    global.putValue(BOOT_CLASSPATH, getBoothClassPath(mylocation));
     global.putValue(PREMAIN_CLASS, AGENT_CLASS_NAME);
     global.putValue(CAN_REDEFINE_CLASSES, "true");
     global.putValue(CAN_SET_NATIVE_METHOD, "true");
@@ -101,7 +101,7 @@ public class JarCreatingJarFinder implements JavaAgent {
     jos.close();
   }
 
-  private String getBootClassPath(final File mylocation) {
+  private String getBoothClassPath(final File mylocation) {
     return mylocation.getAbsolutePath().replace('\\', '/');
   }
 
@@ -118,13 +118,12 @@ public class JarCreatingJarFinder implements JavaAgent {
     final Option<byte[]> bytes = this.classByteSource.getBytes(className);
 
     if (bytes.hasSome()) {
-      return bytes.value();
+        return bytes.value();
     }
 
     throw new PitError("Unable to load class content for " + className);
   }
 
-  @Override
   public void close() {
     if (this.location.hasSome()) {
       final File f = new File(this.location.value());

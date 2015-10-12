@@ -1,12 +1,12 @@
 /*
  * Copyright 2010 Henry Coles
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -37,7 +37,7 @@ import org.pitest.util.StreamUtil;
 
 public class ClassPath {
 
-  private static final Logger         LOG = Log.getLogger();
+  private final static Logger       LOG   = Log.getLogger();
 
   private final CompoundClassPathRoot root;
 
@@ -48,7 +48,7 @@ public class ClassPath {
   public ClassPath(final ClassPathRoot... roots) {
     this(Arrays.asList(roots));
   }
-
+  
   public ClassPath(List<ClassPathRoot> roots) {
     this.root = new CompoundClassPathRoot(roots);
   }
@@ -59,7 +59,6 @@ public class ClassPath {
 
   private static F<File, Boolean> exists() {
     return new F<File, Boolean>() {
-      @Override
       public Boolean apply(final File a) {
         return a.exists() && a.canRead();
       }
@@ -67,7 +66,7 @@ public class ClassPath {
   }
 
   public Collection<String> classNames() {
-    return this.root.classNames();
+    return root.classNames();
   }
 
   // fixme should not be determining type here
@@ -98,84 +97,65 @@ public class ClassPath {
   }
 
   public byte[] getClassData(final String classname) throws IOException {
-    InputStream is = this.root.getData(classname);
-    if (is != null) {
+    InputStream is = root.getData(classname);
+    if ( is != null ) {
       try {
-        return StreamUtil.streamToByteArray(is);
+      return StreamUtil.streamToByteArray(is);
       } finally {
         is.close();
       }
     }
-    return null;
+    return null;  
   }
 
   public URL findResource(final String name) {
     try {
-      return this.root.getResource(name);
+      return root.getResource(name);
     } catch (final IOException exception) {
       return null;
     }
   }
 
-  public static Collection<String> getClassPathElementsAsPaths() {
-    final Set<String> filesAsString = new LinkedHashSet<String>();
-    FCollection.mapTo(getClassPathElementsAsFiles(), fileToString(),
-        filesAsString);
-    return filesAsString;
-  }
-
-  private static F<File, String> fileToString() {
-    return new F<File, String>() {
-      @Override
-      public String apply(File file) {
-        return file.getPath();
-      }
-    };
-  }
-
   public static Collection<File> getClassPathElementsAsFiles() {
-    final Set<File> us = new LinkedHashSet<File>();
-    FCollection.mapTo(getClassPathElementsAsAre(), stringToCanonicalFile(), us);
-    return us;
-  }
 
-  private static F<String, File> stringToCanonicalFile() {
-    return new F<String, File>() {
-      @Override
-      public File apply(String fileAsString) {
-        try {
-          return new File(fileAsString).getCanonicalFile();
-        } catch (final IOException ex) {
-          throw new PitError("Error transforming classpath element "
-              + fileAsString, ex);
-        }
-      }
-    };
+    final String[] elements = getClassPathElements();
+
+    final Set<File> us = new LinkedHashSet<File>();
+    for (final String each : elements) {
+      us.add(new File(each));
+    }
+    return us;
+
   }
 
   /** FIXME move somewhere common */
-  private static List<String> getClassPathElementsAsAre() {
+  public static String[] getClassPathElements() {
     final String classPath = System.getProperty("java.class.path");
     final String separator = File.pathSeparator;
     if (classPath != null) {
-      return Arrays.asList(classPath.split(separator));
+      return classPath.split(separator);
     } else {
-      return new ArrayList<String>();
+      return new String[0];
     }
 
   }
+
 
   public Collection<String> findClasses(final Predicate<String> nameFilter) {
     return FCollection.filter(classNames(), nameFilter);
   }
 
   public String getLocalClassPath() {
-    return this.root.cacheLocation().value();
+    return root.cacheLocation().value();
   }
-
+  
   public ClassPath getComponent(final Predicate<ClassPathRoot> predicate) {
     return new ClassPath(FCollection.filter(this.root, predicate).toArray(
         new ClassPathRoot[0]));
+  }
+  
+  public CompoundClassPathRoot asRoot() {
+    return this.root;
   }
 
 }

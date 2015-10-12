@@ -1,12 +1,12 @@
 /*
  * Copyright 2010 Henry Coles
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -29,35 +29,34 @@ import org.pitest.functional.predicate.Predicate;
 
 /**
  * @author henry
- *
+ * 
  */
 public abstract class Prelude {
 
-  public static final <A> And<A> and(final F<A, Boolean>... ps) {
+  public final static <A> And<A> and(final F<A, Boolean>... ps) {
     return new And<A>(Arrays.asList(ps));
   }
 
-  public static final <A> And<A> and(final Iterable<? extends F<A, Boolean>> ps) {
+  public final static <A> And<A> and(final Iterable<? extends F<A, Boolean>> ps) {
     return new And<A>(ps);
   }
 
-  public static final <A> Not<A> not(final F<A, Boolean> p) {
+  public final static <A> Not<A> not(final F<A, Boolean> p) {
     return new Not<A>(p);
   }
 
-  public static final <A> Or<A> or(final Predicate<A>... ps) {
+  public final static <A> Or<A> or(final Predicate<A>... ps) {
     return new Or<A>(Arrays.asList(ps));
   }
 
-  public static final <A> Or<A> or(final Iterable<Predicate<A>> ps) {
+  public final static <A> Or<A> or(final Iterable<Predicate<A>> ps) {
     return new Or<A>(ps);
   }
 
-  public static final <A> SideEffect1<A> accumulateTo(
+  public final static <A> SideEffect1<A> accumulateTo(
       final Collection<A> collection) {
     return new SideEffect1<A>() {
 
-      @Override
       public void apply(final A a) {
         collection.add(a);
       }
@@ -69,42 +68,39 @@ public abstract class Prelude {
   public static <A, B> SideEffect1<A> putToMap(final Map<A, B> map,
       final B value) {
     return new SideEffect1<A>() {
-      @Override
       public void apply(final A key) {
         map.put(key, value);
       }
     };
   }
 
-  public static final <A> F<A, A> id() {
+  public final static <A> F<A, A> id() {
     return new F<A, A>() {
-      @Override
       public A apply(final A a) {
         return a;
       }
     };
   }
 
-  public static final <A> F<A, A> id(final Class<A> type) {
+  public final static <A> F<A, A> id(final Class<A> type) {
     return id();
   }
 
-  public static final <T> SideEffect1<T> print() {
+  public final static <T> SideEffect1<T> print() {
     return printTo(System.out);
   }
 
-  public static final <T> SideEffect1<T> print(final Class<T> type) {
+  public final static <T> SideEffect1<T> print(final Class<T> type) {
     return print();
   }
 
-  public static final <T> SideEffect1<T> printTo(final Class<T> type,
+  public final static <T> SideEffect1<T> printTo(final Class<T> type,
       final PrintStream stream) {
     return printTo(stream);
   }
 
-  public static final <T> SideEffect1<T> printTo(final PrintStream stream) {
+  public final static <T> SideEffect1<T> printTo(final PrintStream stream) {
     return new SideEffect1<T>() {
-      @Override
       public void apply(final T a) {
         stream.print(a);
       }
@@ -113,7 +109,6 @@ public abstract class Prelude {
 
   public static <T> SideEffect1<T> printWith(final T t) {
     return new SideEffect1<T>() {
-      @Override
       public void apply(final T a) {
         System.out.print(t + " : " + a);
       }
@@ -122,7 +117,6 @@ public abstract class Prelude {
 
   public static <T extends Number> Predicate<T> isGreaterThan(final T value) {
     return new Predicate<T>() {
-      @Override
       public Boolean apply(final T o) {
         return o.longValue() > value.longValue();
       }
@@ -131,7 +125,6 @@ public abstract class Prelude {
 
   public static <T> Predicate<T> isEqualTo(final T value) {
     return new Predicate<T>() {
-      @Override
       public Boolean apply(final T o) {
         return o.equals(value);
       }
@@ -140,7 +133,6 @@ public abstract class Prelude {
 
   public static <T> Predicate<T> isNotNull() {
     return new Predicate<T>() {
-      @Override
       public Boolean apply(final T o) {
         return (o != null);
       }
@@ -149,7 +141,6 @@ public abstract class Prelude {
 
   public static <T> Predicate<T> isNull() {
     return new Predicate<T>() {
-      @Override
       public Boolean apply(final T o) {
         return (o == null);
       }
@@ -159,7 +150,6 @@ public abstract class Prelude {
   public static <T> F<T, Iterable<T>> asList(final Class<T> type) {
     return new F<T, Iterable<T>>() {
 
-      @Override
       public Iterable<T> apply(final T a) {
         return Collections.singletonList(a);
       }
@@ -170,7 +160,6 @@ public abstract class Prelude {
   public static <T> SideEffect1<T> noSideEffect(final Class<T> clazz) {
     return new SideEffect1<T>() {
 
-      @Override
       public void apply(final T a) {
       }
 

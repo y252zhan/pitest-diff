@@ -1,16 +1,16 @@
 /*
  * Copyright 2010 Henry Coles
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and limitations under the License.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); 
+ * you may not use this file except in compliance with the License. 
+ * You may obtain a copy of the License at 
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0 
+ * 
+ * Unless required by applicable law or agreed to in writing, 
+ * software distributed under the License is distributed on an "AS IS" BASIS, 
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
+ * See the License for the specific language governing permissions and limitations under the License. 
  */
 package org.pitest.util;
 
@@ -23,19 +23,18 @@ import org.pitest.functional.predicate.Predicate;
 
 public class Glob implements Predicate<String> {
 
-  private final Pattern regex;
+  private final String regex;
 
   public Glob(final String glob) {
-    this.regex = Pattern.compile(convertGlobToRegex(glob));
+    this.regex = convertGlobToRegex(glob);
   }
 
   public boolean matches(final CharSequence seq) {
-    return this.regex.matcher(seq).matches();
+    return Pattern.matches(this.regex, seq);
   }
 
   public static F<String, Predicate<String>> toGlobPredicate() {
     return new F<String, Predicate<String>>() {
-      @Override
       public Glob apply(final String glob) {
         return new Glob(glob);
       }
@@ -75,14 +74,13 @@ public class Glob implements Predicate<String> {
     return out.toString();
   }
 
-  @Override
   public Boolean apply(final String value) {
     return matches(value);
   }
 
   @Override
   public String toString() {
-    return this.regex.pattern();
+    return this.regex;
   }
 
 }

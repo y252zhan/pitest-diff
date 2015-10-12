@@ -23,7 +23,7 @@ import org.pitest.util.Log;
 
 public class IncrementalAnalyser implements MutationAnalyser {
 
-  private static final Logger              LOG         = Log.getLogger();
+  private final static Logger              LOG         = Log.getLogger();
 
   private final CodeHistory                history;
   private final CoverageDatabase           coverage;
@@ -38,12 +38,11 @@ public class IncrementalAnalyser implements MutationAnalyser {
   private static Map<DetectionStatus, Long> createStatusMap() {
     final HashMap<DetectionStatus, Long> map = new HashMap<DetectionStatus, Long>();
     for (final DetectionStatus each : DetectionStatus.values()) {
-      map.put(each, 0L);
+      map.put(each, 0l);
     }
     return map;
   }
 
-  @Override
   public Collection<MutationResult> analyse(
       final Collection<MutationDetails> mutation) {
 
@@ -110,7 +109,7 @@ public class IncrementalAnalyser implements MutationAnalyser {
 
     final List<ClassName> testClasses = FCollection.filter(allTests,
         testIsCalled(mutationStatusTestPair.getKillingTest().value())).map(
-            TestInfo.toDefiningClassName());
+        TestInfo.toDefiningClassName());
 
     if (testClasses.isEmpty()) {
       return false;
@@ -122,7 +121,6 @@ public class IncrementalAnalyser implements MutationAnalyser {
 
   private static F<TestInfo, Boolean> testIsCalled(final String testName) {
     return new F<TestInfo, Boolean>() {
-      @Override
       public Boolean apply(final TestInfo a) {
         return a.getName().equals(testName);
       }

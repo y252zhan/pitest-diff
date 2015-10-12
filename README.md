@@ -1,6 +1,7 @@
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.pitest/pitest/badge.svg?style=flat)](https://maven-badges.herokuapp.com/maven-central/org.pitest/pitest)
+[![Stories in Ready](https://badge.waffle.io/hcoles/pitest.png?label=ready)](https://waffle.io/hcoles/pitest)
 [![Build Status](https://travis-ci.org/hcoles/pitest.png?branch=master)](https://travis-ci.org/hcoles/pitest)
 
+pitest
 ======
 
 Pitest (aka PIT) is a state of the art mutation testing system for Java and the JVM.
@@ -8,62 +9,6 @@ Pitest (aka PIT) is a state of the art mutation testing system for Java and the 
 Read all about it at http://pitest.org
 
 ## Releases
-
-### 1.1.7-SNAPSHOT
-
-* #196 - Raise minimum java version to 1.6
-
-### 1.1.6
-
-* #10  - Add maven report goal (thanks jasonmfehr) 
-* #184 - Remove undocumented project file feature
-* #219 - Performance improvement for report generation (thanks tobiasbaum) 
-* #190 - Allow custom properties for plugins
-
-### 1.1.5
-
-* Fix for #148 - Stackoverflow with TestNG data providers when using JMockit
-* Fix for #56 - Not reporting junit incompatibilities
-* Fix for #174 - Invalid linecoverage.xml with static initializers 
-* Fix for #183 - Can't run GWTMockito tests
-* Fix for #179 - Broken `includeLaunchClasspath=false` on Windows
-* #173 - Read exclusions and groups from maven surefire config
-
-### 1.1.4
-
-* #157         - Support maven -DskipTests flag (thanks lkwg82)
-* Fix for #163 - Should not include test tree in coverage threshold
-* #166         - Allow classpath exclusions for maven plugin (thanks TomRK1089)
-* #155         - Restore Java 5 compatibility
-* Fix for #148 - Issue with JMockit + TestNG (thanks estekhin and KyleRogers)
-
-### 1.1.3
-
-* Fix for #158 - Tests incorrectly excluded from mutants
-* Fix for #153 - SCM plugin broken for maven 2
-* Fix for #152 - Does not work with IBM jdk
-
-### 1.1.2
-
-* Fix for #150 - line coverage under reported
-
-### 1.1.1
-
-* Block based coverage (fixes 79/131)
-* End support for running on Java 5 (java 5 bytecode still supported)
-* Skip flag for maven modules (#106)
-* Stop declaring TestNG as a dependency 
-* New parameter propagation mutator (thanks UrsMetz)
-
-### 1.1.0
-
-* Change scheme for identifying mutants (see https://github.com/hcoles/pitest/issues/125)
-* Support alternate test apis via plugin system
-* Report error when supplied mutator name does not match (thanks artspb)
-* Report exit codes from coverage child process (thanks KyleRogers)
-* Treat JUnit tests with ClassRule annotation as one unit (thanks devmop)
-
-Please note that any stored history files or sonar results are invalidated by this release.
 
 ### 1.0.0
 
@@ -242,25 +187,3 @@ however disabled by default, and the generated errors are correctly handled by P
 ### 0.18
 
 * First public release
-
-## Credits
-
-Pitest is mainly the work of [me](https://twitter.com/0hjc) but has benefited from contributions from many others. 
-
-Notable contributions not visible [here](https://github.com/hcoles/pitest/graphs/contributors) as they were made before this code was migrated to github include 
-
-* Nicolas Rusconi - Ant Task
-* Struan Kerr-Liddell - Improvements to html report
-* Stephan Pendorf - Multiple improvments including improved mutators
- 
-Although PIT does not incorporate any code from the Jumble project (http://jumble.sourceforge.net/), the Jumble codebase was used as a guide when developing some aspects of PIT.
-
-## Other stuff
-
-The codebase is checked up on in a few places that give slower feedback than the github hooks.
-
-[maven2 on IBM JDK check](https://hjc.ci.cloudbees.com/job/maven2_triangle_example/)
-
-[Sonarqube analysis](http://nemo.sonarqube.org/dashboard/index/793182)
-
-

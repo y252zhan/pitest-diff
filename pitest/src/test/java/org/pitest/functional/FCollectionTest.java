@@ -1,12 +1,13 @@
 /**
- *
+ * 
  */
 package org.pitest.functional;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.junit.matchers.JUnitMatchers.hasItems;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,7 +27,7 @@ import org.pitest.util.PitError;
 
 /**
  * @author henry
- *
+ * 
  */
 public class FCollectionTest {
 
@@ -52,7 +53,6 @@ public class FCollectionTest {
   @Test
   public void shouldReturnOnlyMatchesToPredicate() {
     final Predicate<Integer> p = new Predicate<Integer>() {
-      @Override
       public Boolean apply(final Integer a) {
         return a <= 2;
       }
@@ -65,7 +65,6 @@ public class FCollectionTest {
   public void shouldApplyForEachToAllItems() {
     final List<Integer> actual = new ArrayList<Integer>();
     final SideEffect1<Integer> e = new SideEffect1<Integer>() {
-      @Override
       public void apply(final Integer a) {
         actual.add(a);
       }
@@ -90,7 +89,6 @@ public class FCollectionTest {
   @Test
   public void shouldApplyFlatMapToAllItems() {
     final F<Integer, Collection<Integer>> f = new F<Integer, Collection<Integer>>() {
-      @Override
       public List<Integer> apply(final Integer a) {
         return Arrays.asList(a, a);
       }
@@ -108,7 +106,6 @@ public class FCollectionTest {
 
   private F<Object, Option<Object>> objectToObjectIterable() {
     return new F<Object, Option<Object>>() {
-      @Override
       public Option<Object> apply(final Object a) {
         return Option.some(a);
       }
@@ -133,7 +130,6 @@ public class FCollectionTest {
     final Collection<Integer> xs = Arrays.asList(1, 2, 3);
     final Predicate<Integer> predicate = new Predicate<Integer>() {
 
-      @Override
       public Boolean apply(final Integer a) {
         if (a == 2) {
           throw new PitError("Did not shortcut");
@@ -151,7 +147,6 @@ public class FCollectionTest {
     final Collection<Integer> xs = Arrays.asList(1, 2, 3);
     final F2<Integer, Integer, Integer> f = new F2<Integer, Integer, Integer>() {
 
-      @Override
       public Integer apply(final Integer a, final Integer b) {
         return a + b;
       }
@@ -177,7 +172,7 @@ public class FCollectionTest {
     this.is = Arrays.asList(1, 2, 3);
     final List<List<Integer>> actual = FCollection.splitToLength(3, this.is);
     assertEquals(1, actual.size());
-    assertThat(actual.get(0)).contains(1, 2, 3);
+    assertThat(actual.get(0), hasItems(1, 2, 3));
   }
 
   @Test
@@ -185,8 +180,8 @@ public class FCollectionTest {
     this.is = Arrays.asList(1, 2, 3);
     final List<List<Integer>> actual = FCollection.splitToLength(2, this.is);
     assertEquals(2, actual.size());
-    assertThat(actual.get(0)).contains(1, 2);
-    assertThat(actual.get(1)).contains(3);
+    assertThat(actual.get(0), hasItems(1, 2));
+    assertThat(actual.get(1), hasItems(3));
   }
 
   @Test
@@ -194,9 +189,9 @@ public class FCollectionTest {
     this.is = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11);
     final List<List<Integer>> actual = FCollection.splitToLength(2, this.is);
     assertEquals(6, actual.size());
-    assertThat(actual.get(0)).contains(1, 2);
-    assertThat(actual.get(1)).contains(3, 4);
-    assertThat(actual.get(5)).contains(11);
+    assertThat(actual.get(0), hasItems(1, 2));
+    assertThat(actual.get(1), hasItems(3, 4));
+    assertThat(actual.get(5), hasItems(11));
   }
 
   @Test
@@ -223,7 +218,6 @@ public class FCollectionTest {
 
   private F<Integer, Integer> fortyTwo() {
     return new F<Integer, Integer>() {
-      @Override
       public Integer apply(final Integer a) {
         return 42;
       }

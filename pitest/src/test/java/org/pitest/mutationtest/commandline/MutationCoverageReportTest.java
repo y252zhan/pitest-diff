@@ -1,16 +1,16 @@
 /*
  * Copyright 2011 Henry Coles
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and limitations under the License.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); 
+ * you may not use this file except in compliance with the License. 
+ * You may obtain a copy of the License at 
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0 
+ * 
+ * Unless required by applicable law or agreed to in writing, 
+ * software distributed under the License is distributed on an "AS IS" BASIS, 
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
+ * See the License for the specific language governing permissions and limitations under the License. 
  */
 package org.pitest.mutationtest.commandline;
 
@@ -27,11 +27,9 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Properties;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.pitest.classinfo.ClassByteArraySource;
@@ -68,42 +66,42 @@ import org.pitest.util.Unchecked;
 
 public class MutationCoverageReportTest {
 
-  private MutationCoverage              testee;
+  private MutationCoverage       testee;
 
-  private ReportOptions                 data;
+  private ReportOptions          data;
+  
+  @Mock
+  private MutationResultListenerFactory        listenerFactory;
 
   @Mock
-  private MutationResultListenerFactory listenerFactory;
+  private MutationResultListener listener;
 
   @Mock
-  private MutationResultListener        listener;
+  private CoverageDatabase       coverageDb;
 
   @Mock
-  private CoverageDatabase              coverageDb;
+  private CoverageGenerator      coverage;
 
   @Mock
-  private CoverageGenerator             coverage;
+  private CodeSource             code;
 
   @Mock
-  private CodeSource                    code;
+  private HistoryStore           history;
 
   @Mock
-  private HistoryStore                  history;
+  private MutationEngineFactory  mutationFactory;
 
   @Mock
-  private MutationEngineFactory         mutationFactory;
+  private BuildVerifier          verifier;
 
   @Mock
-  private BuildVerifier                 verifier;
+  private MutationEngine         engine;
 
   @Mock
-  private MutationEngine                engine;
-
+  private Mutater                mutater;
+  
   @Mock
-  private Mutater                       mutater;
-
-  @Mock
-  private ResultOutputStrategy          output;
+  private ResultOutputStrategy output;
 
   @Before
   public void setUp() {
@@ -112,8 +110,7 @@ public class MutationCoverageReportTest {
     this.data.setSourceDirs(Collections.<File> emptyList());
     when(this.coverage.calculateCoverage()).thenReturn(this.coverageDb);
     when(
-        this.listenerFactory.getListener(Matchers.<Properties> any(),
-            any(ListenerArguments.class))).thenReturn(this.listener);
+        this.listenerFactory.getListener(any(ListenerArguments.class))).thenReturn(this.listener);
     mockMutationEngine();
   }
 
@@ -122,9 +119,9 @@ public class MutationCoverageReportTest {
     when(
         this.mutationFactory.createEngine(anyBoolean(), any(Predicate.class),
             anyCollection(), anyCollection(), anyBoolean())).thenReturn(
-                this.engine);
+        this.engine);
     when(this.engine.createMutator(any(ClassByteArraySource.class)))
-    .thenReturn(this.mutater);
+        .thenReturn(this.mutater);
   }
 
   @Test
@@ -183,7 +180,7 @@ public class MutationCoverageReportTest {
     this.data.setFailWhenNoMutations(false);
     final ClassName foo = ClassName.fromString("foo");
     when(this.mutater.findMutations(foo)).thenReturn(
-        MutationDetailsMother.aMutationDetail().build(1));
+        Arrays.asList(MutationDetailsMother.makeMutation()));
     when(this.code.getCodeUnderTestNames()).thenReturn(
         Collections.singleton(foo));
     final CombinedStatistics actual = createAndRunTestee();
@@ -193,8 +190,8 @@ public class MutationCoverageReportTest {
   private CombinedStatistics createAndRunTestee() {
     final MutationStrategies strategies = new MutationStrategies(
         new GregorEngineFactory(), this.history, this.coverage,
-        this.listenerFactory, this.output).with(this.mutationFactory).with(
-            this.verifier);
+        this.listenerFactory, output).with(this.mutationFactory).with(
+        this.verifier);
 
     this.testee = new MutationCoverage(strategies, null, this.code, this.data,
         new SettingsFactory(this.data, PluginServices.makeForContextLoader()),

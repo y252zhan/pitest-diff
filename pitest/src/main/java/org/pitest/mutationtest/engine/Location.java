@@ -1,26 +1,29 @@
 /*
  * Copyright 2013 Henry Coles
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and limitations under the License.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); 
+ * you may not use this file except in compliance with the License. 
+ * You may obtain a copy of the License at 
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0 
+ * 
+ * Unless required by applicable law or agreed to in writing, 
+ * software distributed under the License is distributed on an "AS IS" BASIS, 
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
+ * See the License for the specific language governing permissions and limitations under the License. 
  */
 package org.pitest.mutationtest.engine;
 
+
+
+import org.json.simple.JSONObject;
 import org.pitest.classinfo.ClassName;
 
 /**
  * The co-ordinates of a method within a class.
- *
+ * 
  */
-public final class Location implements Comparable<Location> {
+public class Location implements Comparable<Location> {
 
   private final ClassName  clazz;
   private final MethodName method;
@@ -48,6 +51,29 @@ public final class Location implements Comparable<Location> {
 
   public String getMethodDesc() {
     return this.methodDesc;
+  }
+
+  public Location with(final ClassName clazz) {
+    return newLocation(clazz, this.method, this.methodDesc);
+  }
+
+  public Location withMethod(final String method) {
+    return newLocation(this.clazz, MethodName.fromString(method),
+        this.methodDesc);
+  }
+
+  public Location withClass(final String clazz) {
+    return newLocation(ClassName.fromString(clazz), this.method,
+        this.methodDesc);
+  }
+
+  public Location withMethodDesc(final String desc) {
+    return newLocation(this.clazz, this.method, desc);
+  }
+
+  protected Location newLocation(final ClassName clazz,
+      final MethodName method, final String methodDesc) {
+    return new Location(clazz, method, methodDesc);
   }
 
   @Override
@@ -105,11 +131,19 @@ public final class Location implements Comparable<Location> {
         + ", methodDesc=" + this.methodDesc + "]";
   }
 
+  
+  public JSONObject toJSON(){
+	  JSONObject js = new JSONObject();
+	  js.put("class", this.clazz.toString());
+	  js.put("method", this.method.toString());
+	  js.put("mdesc", this.methodDesc);
+	  
+	  return js;
+	 }
   public String describe() {
     return this.method.name();
   }
 
-  @Override
   public int compareTo(final Location o) {
     int comp = this.clazz.compareTo(o.getClassName());
     if (comp != 0) {

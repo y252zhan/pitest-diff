@@ -1,12 +1,12 @@
 /*
  * Copyright 2010 Henry Coles
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -36,11 +36,11 @@ import org.pitest.mutationtest.engine.gregor.MutationContext;
 
 class MethodCallMethodVisitor extends MethodVisitor {
 
-  private static final Map<Type, Integer>   RETURN_TYPE_MAP = new HashMap<Type, Integer>();
+  private final static Map<Type, Integer>   RETURN_TYPE_MAP = new HashMap<Type, Integer>();
 
   private final F2<String, String, Boolean> filter;
   private final MethodMutatorFactory        factory;
-  private final MutationContext             context;
+  private final MutationContext                     context;
   private final MethodInfo                  methodInfo;
 
   static {

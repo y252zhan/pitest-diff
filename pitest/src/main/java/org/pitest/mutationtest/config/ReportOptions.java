@@ -1,12 +1,12 @@
 /*
  * Copyright 2010 Henry Coles
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -28,13 +28,14 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Properties;
 
 import org.pitest.classpath.ClassFilter;
 import org.pitest.classpath.ClassPath;
 import org.pitest.classpath.ClassPathRoot;
 import org.pitest.classpath.PathFilter;
 import org.pitest.classpath.ProjectClassPaths;
+import org.pitest.coverage.execute.CoverageOptions;
+import org.pitest.execute.Pitest;
 import org.pitest.functional.F;
 import org.pitest.functional.FCollection;
 import org.pitest.functional.Option;
@@ -46,8 +47,8 @@ import org.pitest.mutationtest.build.PercentAndConstantTimeoutStrategy;
 import org.pitest.mutationtest.incremental.FileWriterFactory;
 import org.pitest.mutationtest.incremental.NullWriterFactory;
 import org.pitest.mutationtest.incremental.WriterFactory;
+import org.pitest.testapi.Configuration;
 import org.pitest.testapi.TestGroupConfig;
-import org.pitest.testapi.execute.Pitest;
 import org.pitest.util.Glob;
 import org.pitest.util.ResultOutputStrategy;
 import org.pitest.util.Unchecked;
@@ -57,23 +58,24 @@ import org.pitest.util.Unchecked;
 /**
  * Big ball of user supplied options to configure various aspects of mutation
  * testing.
- *
+ * 
  */
 public class ReportOptions {
 
-  public static final Collection<String> LOGGING_CLASSES                = Arrays
-      .asList(
-          "java.util.logging",
-          "org.apache.log4j",
-          "org.slf4j",
-          "org.apache.commons.logging");
+  public final static Collection<String> LOGGING_CLASSES                = Arrays
+                                                                            .asList(
+                                                                                "java.util.logging",
+                                                                                "org.apache.log4j",
+                                                                                "org.slf4j",
+                                                                                "org.apache.commons.logging");
 
+  private Configuration                  config;
   private Collection<Predicate<String>>  targetClasses;
   private Collection<Predicate<String>>  excludedMethods                = Collections
-      .emptyList();
+                                                                            .emptyList();
 
   private Collection<Predicate<String>>  excludedClasses                = Collections
-      .emptyList();
+                                                                            .emptyList();
 
   private Collection<String>             codePaths;
 
@@ -105,7 +107,7 @@ public class ReportOptions {
 
   private final Collection<String>       outputs                        = new LinkedHashSet<String>();
 
-  private TestGroupConfig                groupConfig;
+  private TestGroupConfig groupConfig;
 
   private int                            mutationUnitSize;
   private boolean                        shouldCreateTimestampedReports = true;
@@ -119,8 +121,6 @@ public class ReportOptions {
   private String                         javaExecutable;
 
   private boolean                        includeLaunchClasspath         = true;
-
-  private Properties                     properties;
 
   public boolean isVerbose() {
     return this.verbose;
@@ -219,7 +219,6 @@ public class ReportOptions {
   private static F<String, File> stringToFile() {
     return new F<String, File>() {
 
-      @Override
       public File apply(final String a) {
         return new File(a);
       }
@@ -294,7 +293,7 @@ public class ReportOptions {
   public Predicate<String> getTargetTestsFilter() {
     if ((this.targetTests == null) || this.targetTests.isEmpty()) {
       return this.getTargetClassesFilter(); // if no tests specified assume the
-      // target classes filter covers both
+                                            // target classes filter covers both
     } else {
       return Prelude.and(or(this.targetTests),
           not(isBlackListed(ReportOptions.this.excludedClasses)));
@@ -306,7 +305,6 @@ public class ReportOptions {
       final Collection<Predicate<String>> excludedClasses) {
     return new Predicate<String>() {
 
-      @Override
       public Boolean apply(final String a) {
         return or(excludedClasses).apply(a);
       }
@@ -372,6 +370,26 @@ public class ReportOptions {
     this.failWhenNoMutations = failWhenNoMutations;
   }
 
+  @SuppressWarnings("unchecked")
+  public CoverageOptions createCoverageOptions() {
+    return new CoverageOptions(Prelude.and(this.getTargetClassesFilter(),
+        not(commonClasses())), this.config, this.isVerbose(),
+        this.getDependencyAnalysisMaxDistance());
+  }
+
+  private static F<String, Boolean> commonClasses() {
+    return new F<String, Boolean>() {
+      public Boolean apply(final String name) {
+        return name.startsWith("java") || name.startsWith("sun/")
+            || name.startsWith("org/junit") || name.startsWith("junit")
+            || name.startsWith("org/pitest/coverage")
+            || name.startsWith("org/pitest/reloc")
+            || name.startsWith("org/pitest/boot");
+      }
+
+    };
+  }
+
   public ProjectClassPaths getMutationClassPaths() {
 
     return new ProjectClassPaths(this.getClassPath(), createClassesFilter(),
@@ -403,6 +421,10 @@ public class ReportOptions {
 
   public void setCodePaths(final Collection<String> codePaths) {
     this.codePaths = codePaths;
+  }
+
+  public void setConfiguration(final Configuration configuration) {
+    this.config = configuration;
   }
 
   public void setGroupConfig(final TestGroupConfig groupConfig) {
@@ -540,24 +562,17 @@ public class ReportOptions {
     return this.includeLaunchClasspath;
   }
 
-  public Properties getFreeFormProperties() {
-    return this.properties;
-  }
-
-  public void setFreeFormProperties(Properties props) {
-    this.properties = props;
-  }
-
   @Override
   public String toString() {
-    return "ReportOptions [targetClasses=" + this.targetClasses
-        + ", excludedMethods=" + this.excludedMethods + ", excludedClasses="
-        + this.excludedClasses + ", codePaths=" + this.codePaths
-        + ", reportDir=" + this.reportDir + ", historyInputLocation="
-        + this.historyInputLocation + ", historyOutputLocation="
-        + this.historyOutputLocation + ", sourceDirs=" + this.sourceDirs
-        + ", classPathElements=" + this.classPathElements + ", mutators="
-        + this.mutators + ", dependencyAnalysisMaxDistance="
+    return "ReportOptions [config=" + this.config + ", targetClasses="
+        + this.targetClasses + ", excludedMethods=" + this.excludedMethods
+        + ", excludedClasses=" + this.excludedClasses + ", codePaths="
+        + this.codePaths + ", reportDir=" + this.reportDir
+        + ", historyInputLocation=" + this.historyInputLocation
+        + ", historyOutputLocation=" + this.historyOutputLocation
+        + ", sourceDirs=" + this.sourceDirs + ", classPathElements="
+        + this.classPathElements + ", mutators=" + this.mutators
+        + ", dependencyAnalysisMaxDistance="
         + this.dependencyAnalysisMaxDistance + ", mutateStaticInitializers="
         + this.mutateStaticInitializers + ", jvmArgs=" + this.jvmArgs
         + ", numberOfThreads=" + this.numberOfThreads + ", timeoutFactor="
@@ -574,8 +589,7 @@ public class ReportOptions {
         + this.exportLineCoverage + ", mutationThreshold="
         + this.mutationThreshold + ", coverageThreshold="
         + this.coverageThreshold + ", mutationEngine=" + this.mutationEngine
-        + ", javaExecutable=" + this.javaExecutable
-        + ", includeLaunchClasspath=" + this.includeLaunchClasspath + "]";
+        + ", javaExecutable=" + this.javaExecutable + "]";
   }
 
 }

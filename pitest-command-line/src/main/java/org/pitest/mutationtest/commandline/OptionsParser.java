@@ -1,12 +1,12 @@
 /*
  * Copyright 2010 Henry Coles
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -37,7 +37,7 @@ import static org.pitest.mutationtest.config.ConfigOption.MUTATION_ENGINE;
 import static org.pitest.mutationtest.config.ConfigOption.MUTATION_THRESHOLD;
 import static org.pitest.mutationtest.config.ConfigOption.MUTATION_UNIT_SIZE;
 import static org.pitest.mutationtest.config.ConfigOption.OUTPUT_FORMATS;
-import static org.pitest.mutationtest.config.ConfigOption.PLUGIN_CONFIGURATION;
+import static org.pitest.mutationtest.config.ConfigOption.PROJECT_FILE;
 import static org.pitest.mutationtest.config.ConfigOption.REPORT_DIR;
 import static org.pitest.mutationtest.config.ConfigOption.SOURCE_DIR;
 import static org.pitest.mutationtest.config.ConfigOption.TARGET_CLASSES;
@@ -54,7 +54,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Properties;
 
 import joptsimple.ArgumentAcceptingOptionSpec;
 import joptsimple.OptionException;
@@ -62,14 +61,20 @@ import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 import joptsimple.OptionSpecBuilder;
-import joptsimple.util.KeyValuePair;
 
 import org.pitest.classpath.ClassPath;
+import org.pitest.classpath.ClassPathByteArraySource;
+import org.pitest.functional.FArray;
 import org.pitest.functional.FCollection;
 import org.pitest.functional.predicate.Predicate;
 import org.pitest.mutationtest.config.ConfigOption;
+import org.pitest.mutationtest.config.ConfigurationFactory;
 import org.pitest.mutationtest.config.ReportOptions;
 import org.pitest.testapi.TestGroupConfig;
+import org.pitest.project.ProjectConfigurationException;
+import org.pitest.project.ProjectConfigurationParser;
+import org.pitest.project.ProjectConfigurationParserException;
+import org.pitest.project.ProjectConfigurationParserFactory;
 import org.pitest.util.Glob;
 import org.pitest.util.Unchecked;
 
@@ -97,6 +102,7 @@ public class OptionsParser {
   private final ArgumentAcceptingOptionSpec<Boolean> verboseSpec;
   private final OptionSpec<String>                   excludedClassesSpec;
   private final OptionSpec<String>                   outputFormatSpec;
+  private final OptionSpec<String>                   projectFileSpec;
   private final OptionSpec<String>                   additionalClassPathSpec;
   private final ArgumentAcceptingOptionSpec<Boolean> failWhenNoMutations;
   private final ArgumentAcceptingOptionSpec<String>  codePaths;
@@ -110,7 +116,6 @@ public class OptionsParser {
   private final OptionSpec<String>                   mutationEngine;
   private final ArgumentAcceptingOptionSpec<Boolean> exportLineCoverageSpec;
   private final OptionSpec<String>                   javaExecutable;
-  private final OptionSpec<KeyValuePair>             pluginPropertiesSpec;
 
   private final ArgumentAcceptingOptionSpec<Boolean> includeLaunchClasspathSpec;
 
@@ -124,13 +129,17 @@ public class OptionsParser {
     this.reportDirSpec = parserAccepts(REPORT_DIR).withRequiredArg()
         .describedAs("directory to create report folder in").required();
 
+    this.projectFileSpec = parserAccepts(PROJECT_FILE).withRequiredArg()
+        .ofType(String.class)
+        .describedAs("The name of the config file to use.");
+
     this.targetClassesSpec = parserAccepts(TARGET_CLASSES)
         .withRequiredArg()
         .ofType(String.class)
         .withValuesSeparatedBy(',')
         .describedAs(
             "comma separated list of filters to match against classes to test")
-            .required();
+        .required();
 
     this.avoidCallsSpec = parserAccepts(AVOID_CALLS)
         .withRequiredArg()
@@ -235,7 +244,7 @@ public class OptionsParser {
         .withValuesSeparatedBy(',')
         .describedAs(
             "comma separated list of listeners to receive mutation results")
-            .defaultsTo("HTML");
+        .defaultsTo("HTML");
 
     this.additionalClassPathSpec = parserAccepts(CLASSPATH).withRequiredArg()
         .ofType(String.class).withValuesSeparatedBy(',')
@@ -265,7 +274,7 @@ public class OptionsParser {
         .ofType(Integer.class)
         .describedAs(
             "Maximum number of mutations to include within a single unit of analysis")
-            .defaultsTo(MUTATION_UNIT_SIZE.getDefault(Integer.class));
+        .defaultsTo(MUTATION_UNIT_SIZE.getDefault(Integer.class));
 
     this.historyInputSpec = parserAccepts(HISTORY_INPUT_LOCATION)
         .withRequiredArg().ofType(File.class)
@@ -292,10 +301,6 @@ public class OptionsParser {
     this.javaExecutable = parserAccepts(JVM_PATH).withRequiredArg()
         .ofType(String.class).describedAs("path to java executable");
 
-    this.pluginPropertiesSpec = parserAccepts(PLUGIN_CONFIGURATION)
-        .withRequiredArg().ofType(KeyValuePair.class)
-        .describedAs("custom plugin properties");
-
   }
 
   private OptionSpecBuilder parserAccepts(final ConfigOption option) {
@@ -303,19 +308,25 @@ public class OptionsParser {
   }
 
   public ParseResult parse(final String[] args) {
+
     final ReportOptions data = new ReportOptions();
     try {
       final OptionSet userArgs = this.parser.parse(args);
-      return parseCommandLine(data, userArgs);
 
+      if (userArgs.has(this.projectFileSpec)) {
+        return loadProjectFile(userArgs);
+      } else {
+        return parseCommandLine(data, userArgs);
+      }
     } catch (final OptionException uoe) {
       return new ParseResult(data, uoe.getLocalizedMessage());
     }
+
   }
 
   /**
    * Creates a new ParseResult object using the command line arguments.
-   *
+   * 
    * @param data
    *          the ReportOptions to populate.
    * @param userArgs
@@ -368,15 +379,13 @@ public class OptionsParser {
     data.setMutationThreshold(this.mutationThreshHoldSpec.value(userArgs));
     data.setCoverageThreshold(this.coverageThreshHoldSpec.value(userArgs));
     data.setMutationEngine(this.mutationEngine.value(userArgs));
-    data.setFreeFormProperties(listToProperties(this.pluginPropertiesSpec
-        .values(userArgs)));
 
     data.setExportLineCoverage(userArgs.has(this.exportLineCoverageSpec)
         && userArgs.valueOf(this.exportLineCoverageSpec));
 
     setClassPath(userArgs, data);
 
-    setTestGroups(userArgs, data);
+    setTestConfiguration(userArgs, data);
     data.setJavaExecutable(this.javaExecutable.value(userArgs));
 
     if (userArgs.has("?")) {
@@ -390,29 +399,52 @@ public class OptionsParser {
 
     final List<String> elements = new ArrayList<String>();
     if (data.isIncludeLaunchClasspath()) {
-      elements.addAll(ClassPath.getClassPathElementsAsPaths());
+      elements.addAll(Arrays.asList(ClassPath.getClassPathElements()));
     } else {
-      elements.addAll(FCollection.filter(
-          ClassPath.getClassPathElementsAsPaths(), this.dependencyFilter));
+      elements.addAll(FArray.filter(ClassPath.getClassPathElements(),
+          dependencyFilter));
     }
     elements.addAll(userArgs.valuesOf(this.additionalClassPathSpec));
     data.setClassPathElements(elements);
   }
 
-  private void setTestGroups(final OptionSet userArgs, final ReportOptions data) {
+  private void setTestConfiguration(final OptionSet userArgs,
+      final ReportOptions data) {
     final TestGroupConfig conf = new TestGroupConfig(
         this.excludedGroupsSpec.values(userArgs),
         this.includedGroupsSpec.values(userArgs));
+    final ConfigurationFactory configFactory = new ConfigurationFactory(conf,
+        new ClassPathByteArraySource(data.getClassPath()));
 
     data.setGroupConfig(conf);
+    data.setConfiguration(configFactory.createConfiguration());
   }
 
-  private Properties listToProperties(List<KeyValuePair> kvps) {
-    Properties p = new Properties();
-    for (KeyValuePair kvp : kvps) {
-      p.put(kvp.key, kvp.value);
+  /**
+   * Creates a new ParseResult object, using the project file specified by the
+   * user on the command line.
+   * 
+   * @param userArgs
+   *          the OptionSet that contains all of the command line arguments.
+   * @return a correctly instantiated ParseResult using the project file to load
+   *         arguments.
+   */
+  private ParseResult loadProjectFile(final OptionSet userArgs) {
+    try {
+      final ProjectConfigurationParser configParser = ProjectConfigurationParserFactory
+          .createParser();
+
+      final ReportOptions loaded = configParser.loadProject(userArgs
+          .valueOf(this.projectFileSpec));
+
+      return new ParseResult(loaded, null);
+    } catch (final ProjectConfigurationParserException e) {
+      return new ParseResult(new ReportOptions(), "Project File ERROR: "
+          + e.getMessage() + ".");
+    } catch (final ProjectConfigurationException e) {
+      return new ParseResult(new ReportOptions(), "Project File ERROR: "
+          + e.getMessage() + ".");
     }
-    return p;
   }
 
   public void printHelp() {

@@ -1,16 +1,16 @@
 /*
  * Copyright 2011 Henry Coles
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and limitations under the License.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); 
+ * you may not use this file except in compliance with the License. 
+ * You may obtain a copy of the License at 
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0 
+ * 
+ * Unless required by applicable law or agreed to in writing, 
+ * software distributed under the License is distributed on an "AS IS" BASIS, 
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
+ * See the License for the specific language governing permissions and limitations under the License. 
  */
 package org.pitest.mutationtest.statistics;
 
@@ -36,7 +36,7 @@ public class Score {
   private static Map<DetectionStatus, StatusCount> createMap() {
     final Map<DetectionStatus, StatusCount> map = new LinkedHashMap<DetectionStatus, StatusCount>();
     for (final DetectionStatus each : DetectionStatus.values()) {
-      map.put(each, new StatusCount(each, 0L));
+      map.put(each, new StatusCount(each, 0l));
     }
     return map;
   }
@@ -51,11 +51,11 @@ public class Score {
   }
 
   public long getTotalMutations() {
-    return FCollection.fold(addTotals(), 0L, this.counts.values());
+    return FCollection.fold(addTotals(), 0l, this.counts.values());
   }
 
   public long getTotalDetectedMutations() {
-    return FCollection.fold(addTotals(), 0L,
+    return FCollection.fold(addTotals(), 0l,
         FCollection.filter(this.counts.values(), isDetected()));
   }
 
@@ -75,7 +75,6 @@ public class Score {
   private static F<StatusCount, Boolean> isDetected() {
     return new F<StatusCount, Boolean>() {
 
-      @Override
       public Boolean apply(final StatusCount a) {
         return a.getStatus().isDetected();
       }
@@ -86,7 +85,6 @@ public class Score {
   private F2<Long, StatusCount, Long> addTotals() {
     return new F2<Long, StatusCount, Long>() {
 
-      @Override
       public Long apply(final Long a, final StatusCount b) {
         return a + b.getCount();
       }
@@ -100,13 +98,13 @@ public class Score {
         + this.getTotalDetectedMutations() + " ("
         + this.getPercentageDetected() + "%)");
     int i = 0;
-    StringBuilder sb = new StringBuilder();
+    StringBuffer sb = new StringBuffer();
     for (final StatusCount each : this.counts.values()) {
       sb.append(each + " ");
       i++;
       if ((i % 4) == 0) {
         out.println("> " + sb.toString());
-        sb = new StringBuilder();
+        sb = new StringBuffer();
       }
     }
     out.println("> " + sb.toString());

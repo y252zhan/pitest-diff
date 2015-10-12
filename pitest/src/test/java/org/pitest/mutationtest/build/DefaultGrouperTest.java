@@ -9,7 +9,6 @@ import java.util.List;
 import org.junit.Test;
 import org.pitest.classinfo.ClassName;
 import org.pitest.mutationtest.LocationMother;
-import org.pitest.mutationtest.LocationMother.LocationBuilder;
 import org.pitest.mutationtest.engine.MutationDetails;
 
 public class DefaultGrouperTest {
@@ -51,9 +50,8 @@ public class DefaultGrouperTest {
   }
 
   public static MutationDetails createDetails(final String clazz) {
-    LocationBuilder lb = LocationMother.aLocation().withClass(
-        ClassName.fromString(clazz));
-    return new MutationDetails(aMutationId().withLocation(lb).build(), "",
+    return new MutationDetails(aMutationId().withLocation(
+        LocationMother.aLocation().with(ClassName.fromString(clazz))), "",
         "desc", 42, 0);
   }
 

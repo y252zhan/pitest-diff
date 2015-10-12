@@ -42,12 +42,6 @@ public class PathToJavaClassConverterTest {
   }
 
   @Test
-  public void shouldConvertFilesWithDotInPath() {
-    assertTrue(this.testee.apply(SRC + "/foo.bar/File.java").iterator()
-        .hasNext());
-  }
-
-  @Test
   public void shouldIncludeWildCardInGeneratedGlobToCatchInnerClasses() {
     assertTrue(apply("foo.java").endsWith("*"));
   }

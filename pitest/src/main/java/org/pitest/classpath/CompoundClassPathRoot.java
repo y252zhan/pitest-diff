@@ -12,8 +12,7 @@ import java.util.List;
 
 import org.pitest.functional.Option;
 
-public class CompoundClassPathRoot implements ClassPathRoot,
-    Iterable<ClassPathRoot> {
+public class CompoundClassPathRoot implements ClassPathRoot, Iterable<ClassPathRoot> {
 
   private final List<ClassPathRoot> roots = new ArrayList<ClassPathRoot>();
 
@@ -21,7 +20,6 @@ public class CompoundClassPathRoot implements ClassPathRoot,
     this.roots.addAll(roots);
   }
 
-  @Override
   public InputStream getData(final String name) throws IOException {
     for (final ClassPathRoot each : this.roots) {
       final InputStream is = each.getData(name);
@@ -32,7 +30,6 @@ public class CompoundClassPathRoot implements ClassPathRoot,
     return null;
   }
 
-  @Override
   public Collection<String> classNames() {
     final List<String> arrayList = new ArrayList<String>();
     for (final ClassPathRoot root : this.roots) {
@@ -41,7 +38,6 @@ public class CompoundClassPathRoot implements ClassPathRoot,
     return arrayList;
   }
 
-  @Override
   public URL getResource(String name) throws MalformedURLException {
     try {
       return findRootForResource(name);
@@ -60,7 +56,7 @@ public class CompoundClassPathRoot implements ClassPathRoot,
     return null;
   }
 
-  @Override
+
   public Option<String> cacheLocation() {
     StringBuilder classpath = new StringBuilder();
     for (final ClassPathRoot each : this.roots) {
@@ -73,9 +69,8 @@ public class CompoundClassPathRoot implements ClassPathRoot,
     return Option.some(classpath.toString());
   }
 
-  @Override
   public Iterator<ClassPathRoot> iterator() {
     return this.roots.iterator();
   }
-
+  
 }

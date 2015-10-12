@@ -2,39 +2,39 @@ package com.example.coverage.execute.samples.exceptions;
 
 public class ThrowsExceptionFromLargeMethodTestee {
   int i;
-
+  
   public int foo() {
-    this.i++;
-    this.i++;
-    this.i++;
-    this.i++;
-    this.i++;
-    this.i++;
-    this.i++;
-    this.i++;
-    this.i++;
-    this.i++;
-    this.i++;
-    this.i++;
-    this.i++;
-    this.i++;
-    this.i++;
-    this.i++;
-    this.i++;
-    this.i++;
-    this.i++;
-    this.i++;
-    this.i++;
-    this.i++;
-    this.i++;
-    this.i++;
-    this.i++;
-    this.i++;
-    this.i++;
-    this.i++;
-    this.i++;
-    throwsException();
-    return this.i;
+      i++;
+      i++;
+      i++;
+      i++;
+      i++;
+      i++;
+      i++;
+      i++;
+      i++;
+      i++;
+      i++;
+      i++;
+      i++;
+      i++;
+      i++;
+      i++;
+      i++;
+      i++;
+      i++;
+      i++;
+      i++;
+      i++;
+      i++;
+      i++;
+      i++;
+      i++;
+      i++;
+      i++;
+      i++;
+      throwsException();
+      return i;
   }
 
   private void throwsException() {

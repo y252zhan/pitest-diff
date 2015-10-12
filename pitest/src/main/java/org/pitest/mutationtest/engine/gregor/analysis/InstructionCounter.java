@@ -2,8 +2,8 @@ package org.pitest.mutationtest.engine.gregor.analysis;
 
 public interface InstructionCounter {
 
-  void increment();
+  public void increment();
 
-  int currentInstructionCount();
+  public int currentInstructionCount();
 
 }

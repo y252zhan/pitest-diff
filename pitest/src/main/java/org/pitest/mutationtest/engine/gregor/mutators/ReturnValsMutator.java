@@ -1,12 +1,12 @@
 /*
  * Copyright 2010 Henry Coles
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -38,18 +38,15 @@ public enum ReturnValsMutator implements MethodMutatorFactory {
 
   RETURN_VALS_MUTATOR;
 
-  @Override
   public MethodVisitor create(final MutationContext context,
       final MethodInfo methodInfo, final MethodVisitor methodVisitor) {
     return new ReturnValsMethodVisitor(this, methodInfo, context, methodVisitor);
   }
 
-  @Override
   public String getGloballyUniqueId() {
     return this.getClass().getName();
   }
 
-  @Override
   public String getName() {
     return name();
   }
@@ -64,20 +61,19 @@ class ReturnValsMethodVisitor extends AbstractInsnMutator {
     super(factory, methodInfo, context, writer);
   }
 
-  private static final Map<Integer, ZeroOperandMutation> MUTATIONS = new HashMap<Integer, ZeroOperandMutation>();
+  private final static Map<Integer, ZeroOperandMutation> mutations = new HashMap<Integer, ZeroOperandMutation>();
 
   static {
-    MUTATIONS.put(IRETURN, ireturnMutation());
-    MUTATIONS.put(DRETURN, dreturnMutation());
-    MUTATIONS.put(FRETURN, freturnMutation());
-    MUTATIONS.put(LRETURN, lreturnMutation());
-    MUTATIONS.put(ARETURN, areturnMutation());
+    mutations.put(IRETURN, ireturnMutation());
+    mutations.put(DRETURN, dreturnMutation());
+    mutations.put(FRETURN, freturnMutation());
+    mutations.put(LRETURN, lreturnMutation());
+    mutations.put(ARETURN, areturnMutation());
   }
 
   private static ZeroOperandMutation areturnMutation() {
     return new ZeroOperandMutation() {
 
-      @Override
       public void apply(final int opCode, final MethodVisitor mv) {
 
         // Strategy translated from jumble BCEL code
@@ -95,7 +91,6 @@ class ReturnValsMethodVisitor extends AbstractInsnMutator {
         mv.visitInsn(Opcodes.ARETURN);
       }
 
-      @Override
       public String decribe(final int opCode, final MethodInfo methodInfo) {
         return "mutated return of Object value for "
             + methodInfo.getDescription()
@@ -108,14 +103,12 @@ class ReturnValsMethodVisitor extends AbstractInsnMutator {
   private static ZeroOperandMutation lreturnMutation() {
     return new ZeroOperandMutation() {
 
-      @Override
       public void apply(final int opcode, final MethodVisitor mv) {
         mv.visitInsn(LCONST_1);
         mv.visitInsn(LADD);
         mv.visitInsn(opcode);
       }
 
-      @Override
       public String decribe(final int opCode, final MethodInfo methodInfo) {
         return "replaced return of long value with value + 1 for "
             + methodInfo.getDescription();
@@ -127,7 +120,6 @@ class ReturnValsMethodVisitor extends AbstractInsnMutator {
   private static ZeroOperandMutation freturnMutation() {
     return new ZeroOperandMutation() {
 
-      @Override
       public void apply(final int opcode, final MethodVisitor mv) {
         // Strategy translated from jumble BCEL code
         // The following is complicated by the problem of NaNs. By default
@@ -147,7 +139,6 @@ class ReturnValsMethodVisitor extends AbstractInsnMutator {
         mv.visitInsn(Opcodes.FRETURN);
       }
 
-      @Override
       public String decribe(final int opCode, final MethodInfo methodInfo) {
         return "replaced return of float value with -(x + 1) for "
             + methodInfo.getDescription();
@@ -159,7 +150,6 @@ class ReturnValsMethodVisitor extends AbstractInsnMutator {
   private static ZeroOperandMutation dreturnMutation() {
     return new ZeroOperandMutation() {
 
-      @Override
       public void apply(final int opCode, final MethodVisitor mv) {
         // Strategy translated from jumble BCEL code
         // The following is complicated by the problem of NaNs. By default
@@ -179,7 +169,6 @@ class ReturnValsMethodVisitor extends AbstractInsnMutator {
         mv.visitInsn(Opcodes.DRETURN);
       }
 
-      @Override
       public String decribe(final int opCode, final MethodInfo methodInfo) {
         return "replaced return of double value with -(x + 1) for "
             + methodInfo.getDescription();
@@ -191,7 +180,6 @@ class ReturnValsMethodVisitor extends AbstractInsnMutator {
   private static ZeroOperandMutation ireturnMutation() {
     return new ZeroOperandMutation() {
 
-      @Override
       public void apply(final int opCode, final MethodVisitor mv) {
         final Label l1 = new Label();
         mv.visitJumpInsn(Opcodes.IFEQ, l1);
@@ -202,7 +190,6 @@ class ReturnValsMethodVisitor extends AbstractInsnMutator {
         mv.visitInsn(Opcodes.IRETURN);
       }
 
-      @Override
       public String decribe(final int opCode, final MethodInfo methodInfo) {
         return "replaced return of integer sized value with (x == 0 ? 1 : 0)";
       }
@@ -212,7 +199,7 @@ class ReturnValsMethodVisitor extends AbstractInsnMutator {
 
   @Override
   protected Map<Integer, ZeroOperandMutation> getMutations() {
-    return MUTATIONS;
+    return mutations;
   }
 
 }

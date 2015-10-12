@@ -1,12 +1,12 @@
 /*
  * Copyright 2010 Henry Coles
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,10 +14,8 @@
  */
 package org.pitest.mutationtest.commandline;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
@@ -37,28 +35,23 @@ import org.mockito.MockitoAnnotations;
 import org.pitest.functional.predicate.Predicate;
 import org.pitest.functional.prelude.Prelude;
 import org.pitest.mutationtest.config.ConfigOption;
-import org.pitest.mutationtest.config.PluginServices;
 import org.pitest.mutationtest.config.ReportOptions;
-import org.pitest.mutationtest.engine.gregor.GregorMutationEngine;
 import org.pitest.mutationtest.engine.gregor.mutators.ConditionalsBoundaryMutator;
 import org.pitest.mutationtest.engine.gregor.mutators.MathMutator;
 
 public class OptionsParserTest {
 
-  private static final String JAVA_PATH_SEPARATOR      = "/";
-
-  private static final String JAVA_CLASS_PATH_PROPERTY = "java.class.path";
-
-  private OptionsParser       testee;
-
+  private OptionsParser testee;
+  
   @Mock
-  private Predicate<String>   filter;
+  private Predicate<String> filter;
+  
 
   @Before
   public void setUp() {
     MockitoAnnotations.initMocks(this);
-    when(this.filter.apply(any(String.class))).thenReturn(true);
-    this.testee = new OptionsParser(this.filter);
+    when(filter.apply(any(String.class))).thenReturn(true);
+    this.testee = new OptionsParser(filter);
   }
 
   @Test
@@ -102,10 +95,8 @@ public class OptionsParserTest {
   @Test
   public void shouldParseCommaSeparatedListOfMutationOperators() {
     final ReportOptions actual = parseAddingRequiredArgs("--mutators",
-        ConditionalsBoundaryMutator.CONDITIONALS_BOUNDARY_MUTATOR.name() + ","
-            + MathMutator.MATH_MUTATOR.name());
-    assertEquals(Arrays.asList(
-        ConditionalsBoundaryMutator.CONDITIONALS_BOUNDARY_MUTATOR.name(),
+        ConditionalsBoundaryMutator.CONDITIONALS_BOUNDARY_MUTATOR.name() + "," + MathMutator.MATH_MUTATOR.name());
+    assertEquals(Arrays.asList(ConditionalsBoundaryMutator.CONDITIONALS_BOUNDARY_MUTATOR.name(),
         MathMutator.MATH_MUTATOR.name()), actual.getMutators());
   }
 
@@ -271,8 +262,9 @@ public class OptionsParserTest {
   public void shouldParseCommaSeparatedListOfOutputFormatsWhenSupplied() {
     final ReportOptions actual = parseAddingRequiredArgs("--outputFormats",
         "HTML,CSV");
-    assertEquals(new HashSet<String>(Arrays.asList("HTML", "CSV")),
-        actual.getOutputFormats());
+    assertEquals(
+        new HashSet<String>(Arrays.asList("HTML",
+            "CSV")), actual.getOutputFormats());
   }
 
   @Test
@@ -306,16 +298,16 @@ public class OptionsParserTest {
 
   @Test
   public void shouldParseCommaSeparatedListOfExcludedTestGroups() {
-    final ReportOptions actual = parseAddingRequiredArgs("--excludedGroups",
-        "foo,bar");
+    final ReportOptions actual = parseAddingRequiredArgs(
+        "--excludedGroups", "foo,bar");
     assertEquals(Arrays.asList("foo", "bar"), actual.getGroupConfig()
         .getExcludedGroups());
   }
 
   @Test
   public void shouldParseCommaSeparatedListOfIncludedTestGroups() {
-    final ReportOptions actual = parseAddingRequiredArgs("--includedGroups",
-        "foo,bar");
+    final ReportOptions actual = parseAddingRequiredArgs(
+        "--includedGroups", "foo,bar");
     assertEquals(Arrays.asList("foo", "bar"), actual.getGroupConfig()
         .getIncludedGroups());
   }
@@ -362,7 +354,7 @@ public class OptionsParserTest {
         "42");
     assertEquals(42, actual.getMutationThreshold());
   }
-
+  
   @Test
   public void shouldParseCoverageThreshold() {
     final ReportOptions actual = parseAddingRequiredArgs("--coverageThreshold",
@@ -376,25 +368,28 @@ public class OptionsParserTest {
     assertEquals("gregor", actual.getMutationEngine());
   }
 
+
   @Test
   public void shouldParseMutationEnigne() {
     final ReportOptions actual = parseAddingRequiredArgs("--mutationEngine",
         "foo");
     assertEquals("foo", actual.getMutationEngine());
   }
-
+  
+  
   @Test
   public void shouldDefaultJVMToNull() {
     final ReportOptions actual = parseAddingRequiredArgs();
     assertEquals(null, actual.getJavaExecutable());
   }
-
+  
   @Test
   public void shouldParseJVM() {
-    final ReportOptions actual = parseAddingRequiredArgs("--jvmPath", "foo");
+    final ReportOptions actual = parseAddingRequiredArgs("--jvmPath",
+        "foo");
     assertEquals("foo", actual.getJavaExecutable());
   }
-
+  
   @Test
   public void shouldParseExportLineCoverageFlag() {
     final ReportOptions actual = parseAddingRequiredArgs("--exportLineCoverage");
@@ -406,83 +401,26 @@ public class OptionsParserTest {
     final ReportOptions actual = parseAddingRequiredArgs("");
     assertFalse(actual.shouldExportLineCoverage());
   }
-
+  
   @Test
   public void shouldIncludeLaunchClasspathByDefault() {
     final ReportOptions actual = parseAddingRequiredArgs("");
     assertTrue(actual.isIncludeLaunchClasspath());
   }
-
+  
   @Test
   public void shouldNotIncludeLaunchClasspathWhenFlagUnset() {
     final ReportOptions actual = parseAddingRequiredArgs("--includeLaunchClasspath=false");
     assertFalse(actual.isIncludeLaunchClasspath());
   }
-
+  
+  
   @Test
   public void shouldIncludeLaunchClasspathWhenFlag() {
     final ReportOptions actual = parseAddingRequiredArgs("--includeLaunchClasspath=true");
     assertTrue(actual.isIncludeLaunchClasspath());
   }
-
-  @Test
-  public void shouldHandleNotCanonicalLaunchClasspathElements() {
-    final String oldClasspath = System.getProperty(JAVA_CLASS_PATH_PROPERTY);
-    try {
-      // given
-      final PluginServices plugins = PluginServices.makeForContextLoader();
-      this.testee = new OptionsParser(new PluginFilter(plugins));
-      // and
-      System.setProperty(JAVA_CLASS_PATH_PROPERTY,
-          getNonCanonicalGregorEngineClassPath());
-      // when
-      final ReportOptions actual = parseAddingRequiredArgs("--includeLaunchClasspath=false");
-      // then
-      assertThat(actual.getClassPath().findClasses(gregorClass())).hasSize(1);
-    } finally {
-      System.setProperty(JAVA_CLASS_PATH_PROPERTY, oldClasspath);
-    }
-  }
-
-  @Test
-  public void shouldCreateEmptyPluginPropertiesWhenNoneSupplied() {
-    final ReportOptions actual = parseAddingRequiredArgs("");
-    assertNotNull(actual.getFreeFormProperties());
-  }
-
-  @Test
-  public void shouldIncludePluginPropertyValuesWhenSingleKey() {
-    final ReportOptions actual = parseAddingRequiredArgs("-pluginConfiguration=foo=1");
-    assertEquals("1", actual.getFreeFormProperties().getProperty("foo"));
-  }
-
-  @Test
-  public void shouldIncludePluginPropertyValuesWhenMultipleKeys() {
-    final ReportOptions actual = parseAddingRequiredArgs(
-        "-pluginConfiguration=foo=1", "-pluginConfiguration=bar=2");
-    assertEquals("1", actual.getFreeFormProperties().getProperty("foo"));
-    assertEquals("2", actual.getFreeFormProperties().getProperty("bar"));
-  }
-
-  private String getNonCanonicalGregorEngineClassPath() {
-    final String gregorEngineClassPath = GregorMutationEngine.class
-        .getProtectionDomain().getCodeSource().getLocation().getFile();
-    final int lastOccurrenceOfFileSeparator = gregorEngineClassPath
-        .lastIndexOf(JAVA_PATH_SEPARATOR);
-    return new StringBuilder(gregorEngineClassPath).replace(
-        lastOccurrenceOfFileSeparator, lastOccurrenceOfFileSeparator + 1,
-        JAVA_PATH_SEPARATOR + "." + JAVA_PATH_SEPARATOR).toString();
-  }
-
-  private Predicate<String> gregorClass() {
-    return new Predicate<String>() {
-      @Override
-      public Boolean apply(String s) {
-        return GregorMutationEngine.class.getName().equals(s);
-      }
-    };
-  }
-
+  
   private ReportOptions parseAddingRequiredArgs(final String... args) {
 
     final List<String> a = new ArrayList<String>();

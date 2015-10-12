@@ -1,12 +1,12 @@
 /*
  * Copyright 2011 Henry Coles
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,7 +15,6 @@
 package org.pitest.maven;
 
 import java.io.File;
-import java.util.Map;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.pitest.mutationtest.config.PluginServices;
@@ -26,18 +25,15 @@ import org.pitest.mutationtest.tooling.EntryPoint;
 
 public class RunPitStrategy implements GoalStrategy {
 
-  @Override
-  public CombinedStatistics execute(File baseDir, ReportOptions data,
-      PluginServices plugins, Map<String, String> environmentVariables)
-          throws MojoExecutionException {
+  public CombinedStatistics execute(final File baseDir, final ReportOptions data, PluginServices plugins)
+      throws MojoExecutionException {
 
-    EntryPoint e = new EntryPoint();
-    AnalysisResult result = e.execute(baseDir, data, plugins,
-        environmentVariables);
-    if (result.getError().hasSome()) {
-      throw new MojoExecutionException("fail", result.getError().value());
-    }
-    return result.getStatistics().value();
+     EntryPoint e = new EntryPoint();
+     AnalysisResult result = e.execute(baseDir, data, plugins);
+     if ( result.getError().hasSome() ) {
+       throw new MojoExecutionException("fail", result.getError().value());
+     }
+     return result.getStatistics().value();
   }
 
 }

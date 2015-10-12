@@ -8,7 +8,7 @@ import org.pitest.util.Log;
 import org.pitest.util.SafeDataOutputStream;
 
 final class SendData implements SideEffect1<SafeDataOutputStream> {
-  private static final Logger   LOG = Log.getLogger();
+  private final static Logger   LOG = Log.getLogger();
   private final CoverageOptions arguments;
   private final List<String>    testClasses;
 
@@ -17,7 +17,6 @@ final class SendData implements SideEffect1<SafeDataOutputStream> {
     this.testClasses = testClasses;
   }
 
-  @Override
   public void apply(final SafeDataOutputStream dos) {
     sendArguments(dos);
     sendTests(dos);

@@ -1,12 +1,12 @@
 /*
  * Copyright 2010 Henry Coles
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -28,18 +28,15 @@ public enum ConditionalsBoundaryMutator implements MethodMutatorFactory {
 
   CONDITIONALS_BOUNDARY_MUTATOR;
 
-  @Override
   public MethodVisitor create(final MutationContext context,
       final MethodInfo methodInfo, final MethodVisitor methodVisitor) {
     return new ConditionalsBoundaryMethodVisitor(this, context, methodVisitor);
   }
 
-  @Override
   public String getGloballyUniqueId() {
     return this.getClass().getName();
   }
 
-  @Override
   public String getName() {
     return name();
   }
@@ -49,20 +46,20 @@ public enum ConditionalsBoundaryMutator implements MethodMutatorFactory {
 class ConditionalsBoundaryMethodVisitor extends AbstractJumpMutator {
 
   private static final String                     DESCRIPTION = "changed conditional boundary";
-  private static final Map<Integer, Substitution> MUTATIONS   = new HashMap<Integer, Substitution>();
+  private final static Map<Integer, Substitution> mutations   = new HashMap<Integer, Substitution>();
 
   static {
-    MUTATIONS.put(Opcodes.IFLE, new Substitution(Opcodes.IFLT, DESCRIPTION));
-    MUTATIONS.put(Opcodes.IFGE, new Substitution(Opcodes.IFGT, DESCRIPTION));
-    MUTATIONS.put(Opcodes.IFGT, new Substitution(Opcodes.IFGE, DESCRIPTION));
-    MUTATIONS.put(Opcodes.IFLT, new Substitution(Opcodes.IFLE, DESCRIPTION));
-    MUTATIONS.put(Opcodes.IF_ICMPLE, new Substitution(Opcodes.IF_ICMPLT,
+    mutations.put(Opcodes.IFLE, new Substitution(Opcodes.IFLT, DESCRIPTION));
+    mutations.put(Opcodes.IFGE, new Substitution(Opcodes.IFGT, DESCRIPTION));
+    mutations.put(Opcodes.IFGT, new Substitution(Opcodes.IFGE, DESCRIPTION));
+    mutations.put(Opcodes.IFLT, new Substitution(Opcodes.IFLE, DESCRIPTION));
+    mutations.put(Opcodes.IF_ICMPLE, new Substitution(Opcodes.IF_ICMPLT,
         DESCRIPTION));
-    MUTATIONS.put(Opcodes.IF_ICMPGE, new Substitution(Opcodes.IF_ICMPGT,
+    mutations.put(Opcodes.IF_ICMPGE, new Substitution(Opcodes.IF_ICMPGT,
         DESCRIPTION));
-    MUTATIONS.put(Opcodes.IF_ICMPGT, new Substitution(Opcodes.IF_ICMPGE,
+    mutations.put(Opcodes.IF_ICMPGT, new Substitution(Opcodes.IF_ICMPGE,
         DESCRIPTION));
-    MUTATIONS.put(Opcodes.IF_ICMPLT, new Substitution(Opcodes.IF_ICMPLE,
+    mutations.put(Opcodes.IF_ICMPLT, new Substitution(Opcodes.IF_ICMPLE,
         DESCRIPTION));
   }
 
@@ -73,7 +70,7 @@ class ConditionalsBoundaryMethodVisitor extends AbstractJumpMutator {
 
   @Override
   protected Map<Integer, Substitution> getMutations() {
-    return MUTATIONS;
+    return mutations;
   }
 
 }

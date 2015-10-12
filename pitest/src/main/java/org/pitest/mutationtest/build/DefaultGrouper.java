@@ -18,9 +18,7 @@ public class DefaultGrouper implements MutationGrouper {
     this.unitSize = unitSize;
   }
 
-  @Override
-  public List<List<MutationDetails>> groupMutations(
-      final Collection<ClassName> codeClasses,
+  public List<List<MutationDetails>> groupMutations(final Collection<ClassName> codeClasses,
       final Collection<MutationDetails> mutations) {
     final Map<ClassName, Collection<MutationDetails>> bucketed = FCollection
         .bucket(mutations, byClass());
@@ -47,11 +45,14 @@ public class DefaultGrouper implements MutationGrouper {
 
   private static F<MutationDetails, ClassName> byClass() {
     return new F<MutationDetails, ClassName>() {
-      @Override
       public ClassName apply(final MutationDetails a) {
         return a.getClassName();
       }
     };
+  }
+
+  public String description() {
+    return "Default grouping";
   }
 
 }

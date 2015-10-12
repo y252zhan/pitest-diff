@@ -1,12 +1,12 @@
 /*
  * Copyright 2010 Henry Coles
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -26,7 +26,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
@@ -47,12 +46,16 @@ import org.pitest.coverage.CoverageGenerator;
 import org.pitest.coverage.execute.CoverageOptions;
 import org.pitest.coverage.execute.DefaultCoverageGenerator;
 import org.pitest.coverage.export.NullCoverageExporter;
+import org.pitest.execute.Container;
+import org.pitest.execute.DefaultStaticConfig;
+import org.pitest.execute.Pitest;
+import org.pitest.execute.containers.UnContainer;
 import org.pitest.functional.FCollection;
 import org.pitest.functional.predicate.False;
 import org.pitest.functional.predicate.Predicate;
 import org.pitest.functional.prelude.Prelude;
-import org.pitest.mutationtest.build.DefaultGrouper;
 import org.pitest.mutationtest.build.DefaultTestPrioritiser;
+import org.pitest.mutationtest.build.DefaultGrouper;
 import org.pitest.mutationtest.build.MutationAnalysisUnit;
 import org.pitest.mutationtest.build.MutationSource;
 import org.pitest.mutationtest.build.MutationTestBuilder;
@@ -64,9 +67,9 @@ import org.pitest.mutationtest.engine.MutationEngine;
 import org.pitest.mutationtest.engine.gregor.MethodMutatorFactory;
 import org.pitest.mutationtest.engine.gregor.config.GregorEngineFactory;
 import org.pitest.mutationtest.engine.gregor.config.Mutator;
-import org.pitest.mutationtest.execute.MutationAnalysisExecutor;
 import org.pitest.mutationtest.filter.UnfilteredMutationFilter;
 import org.pitest.mutationtest.tooling.JarCreatingJarFinder;
+import org.pitest.mutationtest.tooling.MutationResultAdapter;
 import org.pitest.process.DefaultJavaExecutableLocator;
 import org.pitest.process.JavaAgent;
 import org.pitest.process.LaunchOptions;
@@ -83,19 +86,23 @@ import com.example.MutationsInNestedClassesTest;
 @Category(SystemTest.class)
 public class TestMutationTesting {
 
-  private MutationAnalysisExecutor mae;
-  private Configuration            config;
+  private Pitest              pit;
+  private Container           container;
+  private DefaultStaticConfig staticConfig;
+  private Configuration       config;
 
-  private MetaDataExtractor        metaDataExtractor;
+  private MetaDataExtractor   metaDataExtractor;
 
   @Before
   public void setUp() {
     MockitoAnnotations.initMocks(this);
     this.config = new ConfigurationForTesting();
     this.metaDataExtractor = new MetaDataExtractor();
-    this.mae = new MutationAnalysisExecutor(1,
-        Collections
-            .<MutationResultListener> singletonList(this.metaDataExtractor));
+    this.container = new UnContainer();
+    this.staticConfig = new DefaultStaticConfig();
+    this.staticConfig.addTestListener(MutationResultAdapter
+        .adapt(this.metaDataExtractor));
+    this.pit = new Pitest(this.staticConfig);
   }
 
   public static class NoMutations {
@@ -176,7 +183,8 @@ public class TestMutationTesting {
 
   @Test
   public void shouldReportNoResultsIfNoMutationsPossible() {
-    run(NoMutations.class, NoMutationsTest.class, Mutator.byName("RETURN_VALS"));
+    run(NoMutations.class, NoMutationsTest.class,
+        Mutator.byName("RETURN_VALS"));
     verifyResults();
   }
 
@@ -338,12 +346,10 @@ public class TestMutationTesting {
       final JavaAgent agent,
       final Collection<? extends MethodMutatorFactory> mutators) {
 
-    // data.setConfiguration(this.config);
-    final CoverageOptions coverageOptions = createCoverageOptions(data);
-
+    data.setConfiguration(this.config);
+    final CoverageOptions coverageOptions = data.createCoverageOptions();
     final LaunchOptions launchOptions = new LaunchOptions(agent,
-        new DefaultJavaExecutableLocator(), data.getJvmArgs(),
-        new HashMap<String, String>());
+        new DefaultJavaExecutableLocator(), data.getJvmArgs());
 
     final PathFilter pf = new PathFilter(
         Prelude.not(new DefaultDependencyPathPredicate()),
@@ -365,8 +371,8 @@ public class TestMutationTesting {
         ClassInfo.toClassName());
 
     final MutationEngine engine = new GregorEngineFactory()
-    .createEngineWithMutators(false, False.<String> instance(),
-        Collections.<String> emptyList(), mutators, true);
+        .createEngineWithMutators(false, False.<String> instance(),
+            Collections.<String> emptyList(), mutators, true);
 
     final MutationConfig mutationConfig = new MutationConfig(engine,
         launchOptions);
@@ -374,8 +380,7 @@ public class TestMutationTesting {
     final ClassloaderByteArraySource bas = new ClassloaderByteArraySource(
         IsolationUtils.getContextClassLoader());
     final MutationSource source = new MutationSource(mutationConfig,
-        UnfilteredMutationFilter.INSTANCE, new DefaultTestPrioritiser(
-            coverageData), bas);
+        UnfilteredMutationFilter.INSTANCE, new DefaultTestPrioritiser(coverageData), bas);
 
     final WorkerFactory wf = new WorkerFactory(null,
         coverageOptions.getPitConfig(), mutationConfig,
@@ -384,17 +389,12 @@ public class TestMutationTesting {
             .getLocalClassPath());
 
     final MutationTestBuilder builder = new MutationTestBuilder(wf,
-        new NullAnalyser(), source, new DefaultGrouper(0));
+        mutationConfig, new NullAnalyser(), source, new DefaultGrouper(0));
 
     final List<MutationAnalysisUnit> tus = builder
         .createMutationTestUnits(codeClasses);
 
-    this.mae.run(tus);
-  }
-
-  private CoverageOptions createCoverageOptions(ReportOptions data) {
-    return new CoverageOptions(data.getTargetClassesFilter(), this.config,
-        data.isVerbose(), data.getDependencyAnalysisMaxDistance());
+    this.pit.run(this.container, tus);
   }
 
   protected void verifyResults(final DetectionStatus... detectionStatus) {

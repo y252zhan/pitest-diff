@@ -45,7 +45,7 @@ public class DefaultCodeHistoryTest {
 
   @Test
   public void shouldReturnNoneWhenNoMatchingHistoricResultExists() {
-    final MutationIdentifier id = aMutationId().build();
+    final MutationIdentifier id = aMutationId();
     final Option<MutationStatusTestPair> actual = this.testee
         .getPreviousResult(id);
     assertEquals(Option.none(), actual);
@@ -53,7 +53,7 @@ public class DefaultCodeHistoryTest {
 
   @Test
   public void shouldReturnHistoricResultWhenOneExists() {
-    final MutationIdentifier id = aMutationId().build();
+    final MutationIdentifier id = aMutationId();
     final MutationStatusTestPair expected = new MutationStatusTestPair(0,
         DetectionStatus.KILLED, "foo");
     this.results.put(id, expected);
@@ -112,12 +112,12 @@ public class DefaultCodeHistoryTest {
   private void setCurrentClassPath(final HierarchicalClassId currentId) {
     final ClassInfo currentClass = ClassInfoMother.make(currentId.getId());
     when(this.classInfoSource.fetchClass(ClassName.fromString("foo")))
-    .thenReturn(Option.some(currentClass));
+        .thenReturn(Option.some(currentClass));
   }
 
   private void setCurrentClassPath(final ClassInfo info) {
     when(this.classInfoSource.fetchClass(ClassName.fromString("foo")))
-    .thenReturn(Option.some(info));
+        .thenReturn(Option.some(info));
   }
 
   private ClassHistory makeHistory(final HierarchicalClassId id) {
@@ -127,5 +127,6 @@ public class DefaultCodeHistoryTest {
   private ClassHistory makeHistory(final ClassInfo ci) {
     return makeHistory(ci.getHierarchicalId());
   }
+
 
 }

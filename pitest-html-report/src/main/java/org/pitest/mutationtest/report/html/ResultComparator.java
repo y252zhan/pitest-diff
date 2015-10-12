@@ -19,10 +19,9 @@ import org.pitest.mutationtest.MutationResult;
 
 class ResultComparator implements Comparator<MutationResult>, Serializable {
 
-  private static final long                              serialVersionUID = 1L;
-  private static final EnumMap<DetectionStatus, Integer> RANK             = new EnumMap<DetectionStatus, Integer>(
-                                                                              DetectionStatus.class);
-
+  private static final long serialVersionUID = 1L;
+  private final static EnumMap<DetectionStatus,Integer> RANK = new EnumMap<DetectionStatus,Integer>(DetectionStatus.class);
+  
   static {
     RANK.put(KILLED, 4);
     RANK.put(SURVIVED, 0);
@@ -35,7 +34,7 @@ class ResultComparator implements Comparator<MutationResult>, Serializable {
     RANK.put(NO_COVERAGE, 0);
   }
 
-  @Override
+
   public int compare(MutationResult o1, MutationResult o2) {
     return getRanking(o1.getStatus()) - getRanking(o2.getStatus());
 

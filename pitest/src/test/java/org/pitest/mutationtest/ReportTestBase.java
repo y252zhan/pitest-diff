@@ -7,9 +7,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Properties;
 
 import org.junit.Before;
 import org.pitest.classpath.ClassPathRoot;
@@ -45,8 +43,8 @@ public abstract class ReportTestBase {
   protected MetaDataExtractor metaDataExtractor;
   protected ReportOptions     data;
 
-  private PluginServices      plugins;
-
+  private PluginServices plugins;
+  
   @Before
   public void setUp() {
     this.metaDataExtractor = new MetaDataExtractor();
@@ -57,18 +55,14 @@ public abstract class ReportTestBase {
 
   protected MutationResultListenerFactory listenerFactory() {
     return new MutationResultListenerFactory() {
-      @Override
-      public MutationResultListener getListener(Properties props,
-          ListenerArguments args) {
+      public MutationResultListener getListener(ListenerArguments args) {
         return ReportTestBase.this.metaDataExtractor;
       }
 
-      @Override
       public String name() {
         return null;
       }
 
-      @Override
       public String description() {
         return null;
       }
@@ -94,7 +88,7 @@ public abstract class ReportTestBase {
   protected Collection<Predicate<String>> predicateFor(final Class<?> clazz) {
     return predicateFor(clazz.getName());
   }
-
+  
   protected void createAndRun() {
     createAndRun(new JUnitCompatibleConfiguration(new TestGroupConfig()));
   }
@@ -103,10 +97,10 @@ public abstract class ReportTestBase {
     final JavaAgent agent = new JarCreatingJarFinder();
     try {
 
-      final CoverageOptions coverageOptions = createCoverageOptions(configuration);
-      final LaunchOptions launchOptions = new LaunchOptions(agent,
-          new DefaultJavaExecutableLocator(), this.data.getJvmArgs(),
-          new HashMap<String, String>());
+      this.data.setConfiguration(configuration);
+      final CoverageOptions coverageOptions = this.data.createCoverageOptions();
+      final LaunchOptions launchOptions = new LaunchOptions(agent, new DefaultJavaExecutableLocator(),
+          this.data.getJvmArgs());
 
       final PathFilter pf = new PathFilter(new True<ClassPathRoot>(),
           new True<ClassPathRoot>());
@@ -128,8 +122,7 @@ public abstract class ReportTestBase {
           listenerFactory(), null);
 
       final MutationCoverage testee = new MutationCoverage(strategies, null,
-          code, this.data, new SettingsFactory(this.data, this.plugins),
-          timings);
+          code, this.data, new SettingsFactory(this.data, plugins), timings);
 
       testee.runReport();
     } catch (final IOException e) {
@@ -138,15 +131,10 @@ public abstract class ReportTestBase {
       agent.close();
     }
   }
-
-  private CoverageOptions createCoverageOptions(Configuration configuration) {
-    return new CoverageOptions(this.data.getTargetClassesFilter(),
-        configuration, this.data.isVerbose(),
-        this.data.getDependencyAnalysisMaxDistance());
-  }
-
+  
   protected void setMutators(final String mutator) {
     this.data.setMutators(Arrays.asList(mutator));
   }
+
 
 }

@@ -1,12 +1,12 @@
 /*
  * Copyright 2010 Henry Coles
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,30 +19,13 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import org.json.simple.JSONObject;
 import org.pitest.classinfo.ClassName;
 
-/**
- * Uniquely identifies a mutation
- */
-public final class MutationIdentifier implements Comparable<MutationIdentifier> {
+public class MutationIdentifier implements Comparable<MutationIdentifier> {
 
-  /**
-   * The location at which the mutation occurs
-   */
   private final Location      location;
-
-  /**
-   * The indexes to the instructions within the method at which the mutation
-   * occurs.
-   *
-   * Usually this will be a single instruction, but may be multiple if the
-   * mutation has been inlined by the compiler to implement a finally block
-   */
   private final List<Integer> indexes;
-
-  /**
-   * Name of the mutation operator that created this mutation
-   */
   private final String        mutator;
 
   public MutationIdentifier(final Location location, final int index,
@@ -55,63 +38,71 @@ public final class MutationIdentifier implements Comparable<MutationIdentifier> 
     this.location = location;
     this.indexes = new ArrayList<Integer>(indexes);
     this.mutator = mutatorUniqueId;
-  }
 
-  /**
-   * Returns the location of the mutations
-   * 
-   * @return the location of the mutation
-   */
+  }
+  
+  // AMIN DIRTY HACK
+  public MutationIdentifier clone(int i){
+	  MutationIdentifier s = new MutationIdentifier(this.location, this.indexes, this.mutator);
+	
+	  return s;
+  }
+  
+
   public Location getLocation() {
     return this.location;
   }
 
-  /**
-   * Returns the name of the mutator that created this mutation
-   * 
-   * @return the mutator name
-   */
   public String getMutator() {
     return this.mutator;
   }
 
-  /**
-   * Returns the index to the first instruction on which this mutation occurs.
-   * This index is specific to how ASM represents the bytecode.
-   *
-   * @return the zero based index to the instruction
-   */
   public int getFirstIndex() {
     return this.indexes.iterator().next();
   }
 
+  public MutationIdentifier withLocation(final Location location) {
+    return new MutationIdentifier(location, this.indexes, this.mutator);
+  }
+
+  public MutationIdentifier withMutator(final String mutator) {
+    return new MutationIdentifier(this.location, this.indexes, mutator);
+  }
+
+  public MutationIdentifier withIndex(final int id) {
+    return new MutationIdentifier(this.location, id, this.mutator);
+  }
+
+
+
+  
   @Override
   public String toString() {
     return "MutationIdentifier [location=" + this.location + ", indexes="
         + this.indexes + ", mutator=" + this.mutator + "]";
   }
 
-  /**
-   * Returns true if this mutation has a matching identifier
-   * 
-   * @param id
-   *          the MutationIdentifier to match
-   * @return true if the MutationIdentifier matches otherwise false
-   */
-  public boolean matches(final MutationIdentifier id) {
-    return this.location.equals(id.location) && this.mutator.equals(id.mutator)
-        && this.indexes.contains(id.getFirstIndex());
+  
+  public JSONObject toJSON(){
+	  JSONObject js = new JSONObject();
+	  js.put("location", this.location.toJSON());
+	  js.put("indexes", this.indexes.toString());
+	  js.put("mutator", this.mutator);
+	  return js;
+  }
+  
+  
+    public boolean matches(final MutationIdentifier newId) {
+    return this.location.equals(newId.location)
+        && this.mutator.equals(newId.mutator)
+        && this.indexes.contains(newId.getFirstIndex());
   }
 
-  /**
-   * Returns the class in which this mutation is located
-   * 
-   * @return class in which mutation is located
-   */
+  
   public ClassName getClassName() {
     return this.location.getClassName();
   }
-
+  
   @Override
   public int hashCode() {
     final int prime = 31;
@@ -122,6 +113,7 @@ public final class MutationIdentifier implements Comparable<MutationIdentifier> 
         + ((this.location == null) ? 0 : this.location.hashCode());
     result = (prime * result)
         + ((this.mutator == null) ? 0 : this.mutator.hashCode());
+  
     return result;
   }
 
@@ -157,11 +149,10 @@ public final class MutationIdentifier implements Comparable<MutationIdentifier> 
       }
     } else if (!this.mutator.equals(other.mutator)) {
       return false;
-    }
+    } 
     return true;
   }
 
-  @Override
   public int compareTo(final MutationIdentifier other) {
     int comp = this.location.compareTo(other.getLocation());
     if (comp != 0) {

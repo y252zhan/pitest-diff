@@ -11,12 +11,10 @@ public class KnownLocationJavaAgentFinder implements JavaAgent {
     this.location = location;
   }
 
-  @Override
   public Option<String> getJarLocation() {
     return Option.some(this.location);
   }
 
-  @Override
   public void close() {
   }
 

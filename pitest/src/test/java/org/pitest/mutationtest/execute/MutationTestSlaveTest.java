@@ -3,7 +3,7 @@ package org.pitest.mutationtest.execute;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.pitest.mutationtest.LocationMother.aMutationId;
+import static org.pitest.mutationtest.LocationMother.aLocation;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -63,7 +63,7 @@ public class MutationTestSlaveTest {
 
     when(this.is.read(SlaveArguments.class)).thenReturn(this.args);
     when(this.engine.createMutator(any(ClassByteArraySource.class)))
-    .thenReturn(this.mutater);
+        .thenReturn(this.mutater);
 
     this.testee = new MutationTestSlave(this.is, this.reporter);
   }
@@ -76,8 +76,8 @@ public class MutationTestSlaveTest {
 
   @Test
   public void shouldReportErrorWhenOneOccursDuringAnalysis() {
-    this.mutations.add(new MutationDetails(aMutationId().withIndex(0)
-        .withMutator("foo").build(), null, null, 0, 0));
+    this.mutations.add(new MutationDetails(new MutationIdentifier(aLocation(), 1,
+        "foo"), null, null, 0, 0));
     when(this.mutater.getMutation(any(MutationIdentifier.class))).thenThrow(
         new PitError("foo"));
     this.testee.run();

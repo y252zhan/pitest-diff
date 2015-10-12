@@ -1,12 +1,12 @@
 /*
  * Copyright 2012 Henry Coles
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -29,7 +29,6 @@ import org.pitest.coverage.CoverageData;
 import org.pitest.coverage.CoverageExporter;
 import org.pitest.coverage.CoverageGenerator;
 import org.pitest.coverage.CoverageResult;
-import org.pitest.coverage.analysis.LineMapper;
 import org.pitest.functional.F;
 import org.pitest.functional.FCollection;
 import org.pitest.functional.SideEffect1;
@@ -48,7 +47,7 @@ import org.pitest.util.Unchecked;
 
 public class DefaultCoverageGenerator implements CoverageGenerator {
 
-  private static final Logger    LOG = Log.getLogger();
+  private final static Logger    LOG = Log.getLogger();
 
   private final CoverageOptions  coverageOptions;
   private final LaunchOptions    launchOptions;
@@ -71,7 +70,6 @@ public class DefaultCoverageGenerator implements CoverageGenerator {
     this.showProgress = showProgress;
   }
 
-  @Override
   public CoverageData calculateCoverage() {
     try {
       final long t0 = System.currentTimeMillis();
@@ -80,8 +78,7 @@ public class DefaultCoverageGenerator implements CoverageGenerator {
       final Collection<ClassInfo> tests = this.code.getTests();
       this.timings.registerEnd(Timings.Stage.SCAN_CLASS_PATH);
 
-      final CoverageData coverage = new CoverageData(this.code, new LineMapper(
-          this.code));
+      final CoverageData coverage = new CoverageData(this.code);
 
       this.timings.registerStart(Timings.Stage.COVERAGE);
       gatherCoverageData(tests, coverage);
@@ -93,7 +90,7 @@ public class DefaultCoverageGenerator implements CoverageGenerator {
 
       verifyBuildSuitableForMutationTesting(coverage);
 
-      this.exporter.recordCoverage(coverage.createCoverage());
+      this.exporter.recordCoverage(coverage.createLineCoverage());
 
       return coverage;
 
@@ -132,13 +129,8 @@ public class DefaultCoverageGenerator implements CoverageGenerator {
 
     ExitCode exitCode = process.waitToDie();
 
-    if (exitCode == ExitCode.JUNIT_ISSUE) {
-      LOG.severe("Error generating coverage. Please check that your classpath contains JUnit 4.6 or above.");
-      throw new PitError(
-          "Coverage generation slave exited abnormally. Please check the classpath.");
-    } else if (!exitCode.isOk()) {
-      LOG.severe("Coverage generator Slave exited abnormally due to "
-          + exitCode);
+    if(!exitCode.isOk()) {
+      LOG.severe("Coverage generator Slave exited abnormally due to " + exitCode);
       throw new PitError("Coverage generation slave exited abnormally!");
     } else {
       LOG.fine("Coverage generator Slave exited ok");
@@ -147,7 +139,6 @@ public class DefaultCoverageGenerator implements CoverageGenerator {
 
   private static F<ClassInfo, String> classInfoToName() {
     return new F<ClassInfo, String>() {
-      @Override
       public String apply(final ClassInfo a) {
         return a.getName().asInternalName();
       }
@@ -165,7 +156,6 @@ public class DefaultCoverageGenerator implements CoverageGenerator {
 
   private SideEffect1<String> logInfo() {
     return new SideEffect1<String>() {
-      @Override
       public void apply(final String a) {
         LOG.info("SLAVE : " + a);
       }
@@ -174,7 +164,6 @@ public class DefaultCoverageGenerator implements CoverageGenerator {
 
   private SideEffect1<String> log() {
     return new SideEffect1<String>() {
-      @Override
       public void apply(final String a) {
         LOG.fine("SLAVE : " + a);
       }
@@ -185,10 +174,9 @@ public class DefaultCoverageGenerator implements CoverageGenerator {
       final CoverageData coverage) {
     return new SideEffect1<CoverageResult>() {
       private final String[] spinner = new String[] { "\u0008/", "\u0008-",
-          "\u0008\\", "\u0008|" };
+                                         "\u0008\\", "\u0008|" };
       int                    i       = 0;
 
-      @Override
       public void apply(final CoverageResult cr) {
         coverage.calculateClassCoverage(cr);
         if (DefaultCoverageGenerator.this.showProgress) {
@@ -200,12 +188,10 @@ public class DefaultCoverageGenerator implements CoverageGenerator {
     };
   }
 
-  @Override
   public Configuration getConfiguration() {
     return this.coverageOptions.getPitConfig();
   }
 
-  @Override
   public LaunchOptions getLaunchOptions() {
     return this.launchOptions;
   }

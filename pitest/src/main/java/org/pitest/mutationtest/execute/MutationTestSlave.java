@@ -1,12 +1,12 @@
 /*
  * Copyright 2010 Henry Coles
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -31,15 +31,17 @@ import org.pitest.boot.HotSwapAgent;
 import org.pitest.classinfo.ClassByteArraySource;
 import org.pitest.classinfo.ClassName;
 import org.pitest.classpath.ClassloaderByteArraySource;
+import org.pitest.execute.Pitest;
+import org.pitest.execute.UnGroupedStrategy;
 import org.pitest.functional.F3;
 import org.pitest.functional.FCollection;
 import org.pitest.functional.prelude.Prelude;
 import org.pitest.mutationtest.mocksupport.BendJavassistToMyWillTransformer;
 import org.pitest.testapi.Configuration;
 import org.pitest.testapi.TestUnit;
-import org.pitest.testapi.execute.FindTestUnits;
 import org.pitest.util.CommandLineMessage;
 import org.pitest.util.ExitCode;
+import org.pitest.util.Functions;
 import org.pitest.util.Glob;
 import org.pitest.util.IsolationUtils;
 import org.pitest.util.Log;
@@ -129,9 +131,9 @@ public class MutationTestSlave {
       final ClassLoader loader, final Collection<ClassName> testClasses,
       final Configuration pitConfig) {
     final Collection<Class<?>> tcs = FCollection.flatMap(testClasses,
-        ClassName.nameToClass(loader));
-    FindTestUnits finder = new FindTestUnits(pitConfig);
-    return finder.findTestUnitsForAllSuppliedClasses(tcs);
+        Functions.nameToClass(loader));
+    return Pitest.findTestUnitsForAllSuppliedClasses(pitConfig,
+        new UnGroupedStrategy(), tcs);
   }
 
   @SuppressWarnings("unchecked")
@@ -154,7 +156,6 @@ public class MutationTestSlave {
   private static void addMemoryWatchDog(final Reporter r) {
     final NotificationListener listener = new NotificationListener() {
 
-      @Override
       public void handleNotification(final Notification notification,
           final Object handback) {
         final String type = notification.getType();

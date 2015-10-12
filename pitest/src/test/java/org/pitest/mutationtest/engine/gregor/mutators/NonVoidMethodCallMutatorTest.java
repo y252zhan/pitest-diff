@@ -1,16 +1,16 @@
 /*
  * Copyright 2010 Henry Coles
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and limitations under the License.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); 
+ * you may not use this file except in compliance with the License. 
+ * You may obtain a copy of the License at 
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0 
+ * 
+ * Unless required by applicable law or agreed to in writing, 
+ * software distributed under the License is distributed on an "AS IS" BASIS, 
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
+ * See the License for the specific language governing permissions and limitations under the License. 
  */
 
 package org.pitest.mutationtest.engine.gregor.mutators;
@@ -54,7 +54,6 @@ public class NonVoidMethodCallMutatorTest extends MutatorTestBase {
       this.s = this.s + i;
     }
 
-    @Override
     public String call() throws Exception {
       set(1);
       return this.s;
@@ -75,7 +74,6 @@ public class NonVoidMethodCallMutatorTest extends MutatorTestBase {
 
   private static class HasObjectMethodCall implements Callable<String> {
 
-    @Override
     public String call() throws Exception {
       return this.toString();
     }
@@ -93,7 +91,6 @@ public class NonVoidMethodCallMutatorTest extends MutatorTestBase {
       return true;
     }
 
-    @Override
     public String call() throws Exception {
       final boolean result = booleanMethod();
       return "" + result;
@@ -112,7 +109,6 @@ public class NonVoidMethodCallMutatorTest extends MutatorTestBase {
       return 9123475.3d;
     }
 
-    @Override
     public String call() throws Exception {
       final double result = doubleMethod();
       return "" + result;
@@ -131,7 +127,6 @@ public class NonVoidMethodCallMutatorTest extends MutatorTestBase {
       return 5;
     }
 
-    @Override
     public String call() throws Exception {
       final byte result = byteMethod();
       return "" + result;
@@ -149,7 +144,6 @@ public class NonVoidMethodCallMutatorTest extends MutatorTestBase {
       return 'g';
     }
 
-    @Override
     public String call() throws Exception {
       final char result = charMethod();
       return "" + result;
@@ -167,7 +161,6 @@ public class NonVoidMethodCallMutatorTest extends MutatorTestBase {
       return 23;
     }
 
-    @Override
     public String call() throws Exception {
       final short result = shortMethod();
       return "" + result;
@@ -186,7 +179,6 @@ public class NonVoidMethodCallMutatorTest extends MutatorTestBase {
       return 23;
     }
 
-    @Override
     public String call() throws Exception {
       final long result = longMethod();
       return "" + result;
@@ -204,7 +196,6 @@ public class NonVoidMethodCallMutatorTest extends MutatorTestBase {
       return 23;
     }
 
-    @Override
     public String call() throws Exception {
       final float result = floatMethod();
       return "" + result;
@@ -219,7 +210,6 @@ public class NonVoidMethodCallMutatorTest extends MutatorTestBase {
   }
 
   private static class UsesReturnValueOfMethodCall implements Callable<String> {
-    @Override
     public String call() throws Exception {
       return this.toString().toUpperCase();
     }
@@ -237,7 +227,6 @@ public class NonVoidMethodCallMutatorTest extends MutatorTestBase {
     @SuppressWarnings("unused")
     private static Logger log = Logger.getLogger(HasLogger.class.getName());
 
-    @Override
     public String call() throws Exception {
       return "ok";
     }
@@ -260,7 +249,6 @@ public class NonVoidMethodCallMutatorTest extends MutatorTestBase {
       return i + 42;
     }
 
-    @Override
     @SuppressWarnings("finally")
     public String call() throws Exception {
       int c = 2;

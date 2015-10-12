@@ -1,12 +1,12 @@
 /*
  * Copyright 2010 Henry Coles
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,17 +14,13 @@
  */
 package org.pitest.classinfo;
 
+import org.objectweb.asm.*;
+import org.pitest.bytecode.NullVisitor;
+import org.pitest.coverage.codeassist.BridgeMethodFilter;
+import org.pitest.coverage.codeassist.MethodFilteringAdapter;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import org.objectweb.asm.AnnotationVisitor;
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.ClassVisitor;
-import org.objectweb.asm.Label;
-import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.Type;
-import org.pitest.bytecode.NullVisitor;
 
 public final class ClassInfoVisitor extends MethodFilteringAdapter {
 
@@ -96,11 +92,10 @@ public final class ClassInfoVisitor extends MethodFilteringAdapter {
   }
 
   private static class ClassAnnotationValueVisitor extends AnnotationVisitor {
-    private final ClassInfoBuilder classInfo;
-    private final ClassName        annotation;
+    private ClassInfoBuilder classInfo;
+    private ClassName annotation;
 
-    public ClassAnnotationValueVisitor(ClassInfoBuilder classInfo,
-        ClassName annotation) {
+    public ClassAnnotationValueVisitor(ClassInfoBuilder classInfo, ClassName annotation) {
       super(Opcodes.ASM5, null);
       this.classInfo = classInfo;
       this.annotation = annotation;
@@ -109,8 +104,7 @@ public final class ClassInfoVisitor extends MethodFilteringAdapter {
     @Override
     public void visit(String name, Object value) {
       if (name.equals("value")) {
-        this.classInfo.registerClassAnnotationValue(this.annotation,
-            simplify(value));
+        classInfo.registerClassAnnotationValue(annotation, simplify(value));
       }
       super.visit(name, value);
     }
@@ -129,10 +123,7 @@ public final class ClassInfoVisitor extends MethodFilteringAdapter {
 
           @Override
           public void visitEnd() {
-            ClassAnnotationValueVisitor.this.classInfo
-                .registerClassAnnotationValue(
-                    ClassAnnotationValueVisitor.this.annotation,
-                    arrayValue.toArray());
+            classInfo.registerClassAnnotationValue(annotation, arrayValue.toArray());
           }
         };
       }
@@ -152,8 +143,7 @@ public final class ClassInfoVisitor extends MethodFilteringAdapter {
 class InfoMethodVisitor extends MethodVisitor {
   private final ClassInfoBuilder classInfo;
 
-  public InfoMethodVisitor(final ClassInfoBuilder classInfo,
-      final MethodVisitor writer) {
+  public InfoMethodVisitor(final ClassInfoBuilder classInfo, final MethodVisitor writer) {
     super(Opcodes.ASM5, writer);
     this.classInfo = classInfo;
   }

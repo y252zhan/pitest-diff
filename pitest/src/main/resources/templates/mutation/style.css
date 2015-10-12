@@ -18,11 +18,10 @@ body{
 }
 
 .src { 
-	border: 1px solid #dddddd;
-	padding-top: 10px;
-	padding-right: 5px;
-	padding-left: 5px;
-	font-family: Consolas, Courier, monospace;
+border: 1px solid #dddddd;
+padding-top: 10px;
+padding-right: 5px;
+padding-left: 5px;
 }
 
 

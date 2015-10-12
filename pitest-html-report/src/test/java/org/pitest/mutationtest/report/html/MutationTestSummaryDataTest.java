@@ -17,7 +17,7 @@ public class MutationTestSummaryDataTest {
 
   private MutationTestSummaryData testee;
 
-  private static final String     FILE_NAME = "foo.java";
+  private final static String     FILE_NAME = "foo.java";
 
   @Test
   public void shouldReturnCorrectNumberOfFilesWhenAnalysedInOneUnit() {

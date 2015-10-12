@@ -1,12 +1,12 @@
 /*
  * Copyright 2010 Henry Coles
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,14 +14,17 @@
  */
 package org.pitest.functional;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 
-public abstract class Option<T> implements FunctionalIterable<T> {
+public abstract class Option<T> implements FunctionalIterable<T>, Serializable {
+
+  private static final long serialVersionUID = 1L;
 
   @SuppressWarnings({ "rawtypes" })
-  private static final None NONE = new None();
+  private final static None NONE             = new None();
 
   private Option() {
   }
@@ -32,32 +35,26 @@ public abstract class Option<T> implements FunctionalIterable<T> {
 
   public abstract boolean hasSome();
 
-  @Override
   public boolean contains(final F<T, Boolean> predicate) {
     return FCollection.contains(this, predicate);
   }
 
-  @Override
   public FunctionalList<T> filter(final F<T, Boolean> predicate) {
     return FCollection.filter(this, predicate);
   }
 
-  @Override
   public <B> FunctionalList<B> flatMap(final F<T, ? extends Iterable<B>> f) {
     return FCollection.flatMap(this, f);
   }
 
-  @Override
   public void forEach(final SideEffect1<T> e) {
     FCollection.forEach(this, e);
   }
 
-  @Override
   public <B> FunctionalList<B> map(final F<T, B> f) {
     return FCollection.map(this, f);
   }
 
-  @Override
   public <B> void mapTo(final F<T, B> f, final Collection<? super B> bs) {
     FCollection.mapTo(this, f, bs);
   }
@@ -80,13 +77,14 @@ public abstract class Option<T> implements FunctionalIterable<T> {
     return !hasSome();
   }
 
-  public static final class None<T> extends Option<T> {
+  public final static class None<T> extends Option<T> {
+
+    private static final long serialVersionUID = 1L;
 
     private None() {
 
     }
 
-    @Override
     public Iterator<T> iterator() {
       return Collections.<T> emptySet().iterator();
     }
@@ -109,9 +107,11 @@ public abstract class Option<T> implements FunctionalIterable<T> {
 
   }
 
-  public static final class Some<T> extends Option<T> {
+  public final static class Some<T> extends Option<T> {
 
-    private final T value;
+    private static final long serialVersionUID = 1L;
+
+    private final T           value;
 
     private Some(final T value) {
       this.value = value;
@@ -122,7 +122,6 @@ public abstract class Option<T> implements FunctionalIterable<T> {
       return this.value;
     }
 
-    @Override
     public Iterator<T> iterator() {
       return Collections.singleton(this.value).iterator();
 

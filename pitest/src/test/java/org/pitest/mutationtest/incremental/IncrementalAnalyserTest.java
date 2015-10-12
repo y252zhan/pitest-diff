@@ -3,8 +3,7 @@ package org.pitest.mutationtest.incremental;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
-import static org.pitest.mutationtest.LocationMother.aLocation;
-import static org.pitest.mutationtest.LocationMother.aMutationId;
+import static org.pitest.mutationtest.LocationMother.*;
 
 import java.math.BigInteger;
 import java.util.Collection;
@@ -44,7 +43,7 @@ public class IncrementalAnalyserTest {
   public void shouldStartNewMutationsAtAStatusOfNotStarted() {
     final MutationDetails md = makeMutation("foo");
     when(this.history.getPreviousResult(any(MutationIdentifier.class)))
-    .thenReturn(Option.<MutationStatusTestPair> none());
+        .thenReturn(Option.<MutationStatusTestPair> none());
 
     final Collection<MutationResult> actual = this.testee.analyse(Collections
         .singletonList(md));
@@ -111,7 +110,7 @@ public class IncrementalAnalyserTest {
     final Collection<TestInfo> tests = Collections.singleton(new TestInfo(
         "TEST_CLASS", killingTest, 0, Option.<ClassName> none(), 0));
     when(this.coverage.getTestsForClass(any(ClassName.class)))
-    .thenReturn(tests);
+        .thenReturn(tests);
     when(this.history.hasClassChanged(any(ClassName.class))).thenReturn(false);
     final MutationResult actual = this.testee
         .analyse(Collections.singletonList(md)).iterator().next();
@@ -129,11 +128,11 @@ public class IncrementalAnalyserTest {
     final Collection<TestInfo> tests = Collections.singleton(new TestInfo(
         "TEST_CLASS", killingTest, 0, Option.<ClassName> none(), 0));
     when(this.coverage.getTestsForClass(any(ClassName.class)))
-    .thenReturn(tests);
+        .thenReturn(tests);
     when(this.history.hasClassChanged(ClassName.fromString("foo"))).thenReturn(
         false);
     when(this.history.hasClassChanged(ClassName.fromString("TEST_CLASS")))
-    .thenReturn(true);
+        .thenReturn(true);
     final MutationResult actual = this.testee
         .analyse(Collections.singletonList(md)).iterator().next();
 
@@ -141,8 +140,7 @@ public class IncrementalAnalyserTest {
   }
 
   private MutationDetails makeMutation(final String method) {
-    final MutationIdentifier id = aMutationId().withLocation(
-        aLocation().withMethod(method)).build();
+    final MutationIdentifier id =  aMutationId().withLocation(aLocation().withMethod(method));
     return new MutationDetails(id, "file", "desc", 1, 2);
   }
 
@@ -153,7 +151,7 @@ public class IncrementalAnalyserTest {
   private void setHistoryForAllMutationsTo(final DetectionStatus status,
       final String test) {
     when(this.history.getPreviousResult(any(MutationIdentifier.class)))
-    .thenReturn(Option.some(new MutationStatusTestPair(0, status, test)));
+        .thenReturn(Option.some(new MutationStatusTestPair(0, status, test)));
   }
 
 }

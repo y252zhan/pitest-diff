@@ -1,6 +1,6 @@
 package org.pitest.mutationtest.engine;
 
-public class MethodName {
+public final class MethodName {
 
   private final String name;
 

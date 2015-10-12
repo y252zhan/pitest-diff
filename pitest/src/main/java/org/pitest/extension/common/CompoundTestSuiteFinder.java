@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.pitest.testapi.TestSuiteFinder;
 
-public final class CompoundTestSuiteFinder implements TestSuiteFinder {
+public class CompoundTestSuiteFinder implements TestSuiteFinder {
 
   private final Collection<TestSuiteFinder> children;
 
@@ -14,7 +14,6 @@ public final class CompoundTestSuiteFinder implements TestSuiteFinder {
     this.children = children;
   }
 
-  @Override
   public List<Class<?>> apply(final Class<?> a) {
     for (final TestSuiteFinder i : this.children) {
       final List<Class<?>> found = i.apply(a);

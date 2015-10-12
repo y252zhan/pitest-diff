@@ -1,12 +1,12 @@
 /*
  * Copyright 2010 Henry Coles
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -39,7 +39,6 @@ public class NegateConditionalsMutatorTest extends MutatorTestBase {
       this.i = i;
     }
 
-    @Override
     public String call() {
       if (this.i != 0) {
         return "was not zero";
@@ -63,7 +62,6 @@ public class NegateConditionalsMutatorTest extends MutatorTestBase {
       this.i = i;
     }
 
-    @Override
     public String call() {
       if (this.i == 0) {
         return "was zero";
@@ -87,7 +85,6 @@ public class NegateConditionalsMutatorTest extends MutatorTestBase {
       this.i = i;
     }
 
-    @Override
     public String call() {
       if (this.i > 0) {
         return "was > zero";
@@ -112,7 +109,6 @@ public class NegateConditionalsMutatorTest extends MutatorTestBase {
       this.i = i;
     }
 
-    @Override
     public String call() {
       if (this.i < 0) {
         return "was < zero";
@@ -137,7 +133,6 @@ public class NegateConditionalsMutatorTest extends MutatorTestBase {
       this.i = i;
     }
 
-    @Override
     public String call() {
       if (this.i <= 0) {
         return "was <= zero";
@@ -162,7 +157,6 @@ public class NegateConditionalsMutatorTest extends MutatorTestBase {
       this.i = i;
     }
 
-    @Override
     public String call() {
       if (this.i >= 0) {
         return "was >= zero";
@@ -187,7 +181,6 @@ public class NegateConditionalsMutatorTest extends MutatorTestBase {
       this.i = i;
     }
 
-    @Override
     public String call() {
       if (this.i != null) {
         return "was not null";
@@ -211,7 +204,6 @@ public class NegateConditionalsMutatorTest extends MutatorTestBase {
       this.i = i;
     }
 
-    @Override
     public String call() {
       if (this.i == null) {
         return "was null";
@@ -235,7 +227,6 @@ public class NegateConditionalsMutatorTest extends MutatorTestBase {
       this.i = i;
     }
 
-    @Override
     public String call() {
       final int j = getZeroButPreventInlining();
       if (this.i == j) {
@@ -260,7 +251,6 @@ public class NegateConditionalsMutatorTest extends MutatorTestBase {
       this.i = i;
     }
 
-    @Override
     public String call() {
       final int j = getZeroButPreventInlining();
       if (this.i != j) {
@@ -285,7 +275,6 @@ public class NegateConditionalsMutatorTest extends MutatorTestBase {
       this.i = i;
     }
 
-    @Override
     public String call() {
       final int j = getZeroButPreventInlining();
       if (this.i > j) {
@@ -311,7 +300,6 @@ public class NegateConditionalsMutatorTest extends MutatorTestBase {
       this.i = i;
     }
 
-    @Override
     public String call() {
       final int j = getZeroButPreventInlining();
       if (this.i < j) {
@@ -337,7 +325,6 @@ public class NegateConditionalsMutatorTest extends MutatorTestBase {
       this.i = i;
     }
 
-    @Override
     public String call() {
       final int j = getZeroButPreventInlining();
       if (this.i <= j) {
@@ -363,7 +350,6 @@ public class NegateConditionalsMutatorTest extends MutatorTestBase {
       this.i = i;
     }
 
-    @Override
     public String call() {
       final int j = getZeroButPreventInlining();
       if (this.i >= j) {
@@ -389,7 +375,6 @@ public class NegateConditionalsMutatorTest extends MutatorTestBase {
       this.i = i;
     }
 
-    @Override
     public String call() {
       final Object integer = Integer.class;
       if (this.i == integer) {
@@ -417,7 +402,6 @@ public class NegateConditionalsMutatorTest extends MutatorTestBase {
       this.i = i;
     }
 
-    @Override
     public String call() {
       final Object integer = Integer.class;
       if (this.i != integer) {

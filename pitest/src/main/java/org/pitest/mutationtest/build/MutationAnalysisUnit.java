@@ -1,14 +1,9 @@
 package org.pitest.mutationtest.build;
 
-import java.util.concurrent.Callable;
+import org.pitest.testapi.TestUnit;
 
-import org.pitest.mutationtest.MutationMetaData;
+public interface MutationAnalysisUnit extends TestUnit {
 
-/**
- * A unit of mutation analysis
- */
-public interface MutationAnalysisUnit extends Callable<MutationMetaData> {
-
-  int priority();
+  public int priority();
 
 }

@@ -1,12 +1,12 @@
 /*
  * Copyright 2010 Henry Coles
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,37 +14,79 @@
  */
 package org.pitest.mutationtest.build;
 
+import static org.pitest.util.Unchecked.translateCheckedException;
+
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.logging.Logger;
 
+
 import org.pitest.classinfo.ClassName;
 import org.pitest.mutationtest.DetectionStatus;
+import org.pitest.mutationtest.MutationConfig;
 import org.pitest.mutationtest.MutationMetaData;
 import org.pitest.mutationtest.MutationStatusMap;
 import org.pitest.mutationtest.engine.MutationDetails;
 import org.pitest.mutationtest.execute.MutationTestProcess;
+import org.pitest.testapi.AbstractTestUnit;
+import org.pitest.testapi.Description;
+import org.pitest.testapi.MetaData;
+import org.pitest.testapi.ResultCollector;
 import org.pitest.util.ExitCode;
 import org.pitest.util.Log;
 
-public class MutationTestUnit implements MutationAnalysisUnit {
+public class MutationTestUnit extends AbstractTestUnit implements
+    MutationAnalysisUnit {
 
-  private static final Logger               LOG = Log.getLogger();
+  private final static Logger               LOG = Log.getLogger();
 
+  private final MutationConfig              config;
   private final Collection<MutationDetails> availableMutations;
   private final WorkerFactory               workerFactory;
 
   private final Collection<ClassName>       testClasses;
 
   public MutationTestUnit(final Collection<MutationDetails> availableMutations,
-      final Collection<ClassName> testClasses, final WorkerFactory workerFactor) {
+      final Collection<ClassName> testClasses,
+      final MutationConfig mutationConfig, final WorkerFactory workerFactor) {
+    super(new Description("Mutation test"));
     this.availableMutations = availableMutations;
+    this.config = mutationConfig;
     this.testClasses = testClasses;
     this.workerFactory = workerFactor;
   }
 
   @Override
-  public MutationMetaData call() throws Exception {
+  public void execute(final ClassLoader loader, final ResultCollector rc) {
+
+    try {
+      rc.notifyStart(this.getDescription());
+      runTests(rc);
+    } catch (final Throwable ex) {
+      rc.notifyEnd(this.getDescription(), ex);
+    }
+
+  }
+
+  private void runTests(final ResultCollector rc) {
+
+    try {
+      if (!this.availableMutations.isEmpty()) {
+        runTestsForMutations(rc);
+      } else {
+        LOG.fine("No mutations to detect");
+        rc.notifySkipped(this.getDescription());
+      }
+    } catch (final Exception ex) {
+      throw translateCheckedException(ex);
+    }
+
+  }
+
+  private void runTestsForMutations(final ResultCollector rc)
+      throws IOException, InterruptedException {
+
     final MutationStatusMap mutations = new MutationStatusMap();
 
     mutations.setStatusForMutations(this.availableMutations,
@@ -54,8 +96,21 @@ public class MutationTestUnit implements MutationAnalysisUnit {
 
     runTestsInSeperateProcess(mutations);
 
-    return reportResults(mutations);
+    reportResults(mutations, rc);
   }
+
+
+
+  private void runTestsInSeperateProcess(final MutationStatusMap mutations)
+      throws IOException, InterruptedException {
+
+    while (mutations.hasUnrunMutations()) {
+      runTestInSeperateProcessForMutationRange(mutations);
+    }
+
+  }
+
+
 
   private void runTestInSeperateProcessForMutationRange(
       final MutationStatusMap mutations) throws IOException,
@@ -63,17 +118,25 @@ public class MutationTestUnit implements MutationAnalysisUnit {
 
     final Collection<MutationDetails> remainingMutations = mutations
         .getUnrunMutations();
-    final MutationTestProcess worker = this.workerFactory.createWorker(
-        remainingMutations, this.testClasses);
-    worker.start();
+    LOG.fine("########### |TS| = " + this.testClasses.size() + "   |MU| = " + remainingMutations.size());
 
-    setFirstMutationToStatusOfStartedInCaseSlaveFailsAtBoot(mutations,
-        remainingMutations);
+    
+    final ArrayList<MutationDetails> subList = new ArrayList<MutationDetails>(); // ADDED by AMIN
+    for(MutationDetails md :remainingMutations){
+	subList.clear();
+	subList.add(md);
+	final MutationTestProcess worker = this.workerFactory.createWorker(
+									   subList, this.testClasses);
+	worker.start();
 
-    final ExitCode exitCode = waitForSlaveToDie(worker);
-    worker.results(mutations);
+	setFirstMutationToStatusOfStartedInCaseSlaveFailsAtBoot(mutations,
+								subList);
 
-    correctResultForProcessExitCode(mutations, exitCode);
+	final ExitCode exitCode = waitForSlaveToDie(worker);
+	worker.results(mutations);
+
+	correctResultForProcessExitCode(mutations, exitCode);
+    }
 
   }
 
@@ -109,19 +172,21 @@ public class MutationTestUnit implements MutationAnalysisUnit {
 
   }
 
-  private void runTestsInSeperateProcess(final MutationStatusMap mutations)
-      throws IOException, InterruptedException {
-    while (mutations.hasUnrunMutations()) {
-      runTestInSeperateProcessForMutationRange(mutations);
-    }
+
+  private void reportResults(final MutationStatusMap mutationsMap,
+      final ResultCollector rc) {
+
+    final MetaData md = new MutationMetaData(
+        mutationsMap.createMutationResults());
+
+    rc.notifyEnd(this.getDescription(), md);
 
   }
 
-  private MutationMetaData reportResults(final MutationStatusMap mutationsMap) {
-    return new MutationMetaData(mutationsMap.createMutationResults());
+  public MutationConfig getMutationConfig() {
+    return this.config;
   }
 
-  @Override
   public int priority() {
     return this.availableMutations.size();
   }

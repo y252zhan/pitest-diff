@@ -1,12 +1,12 @@
 /*
  * Copyright 2011 Henry Coles
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,10 +22,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import nl.jqno.equalsverifier.EqualsVerifier;
-
 import org.junit.Test;
-import org.pitest.functional.Option;
 
 public class ClassNameTest {
 
@@ -139,23 +136,6 @@ public class ClassNameTest {
   public void shouldTreatDifferentClassesAsNotEqual() {
     assertFalse(ClassName.fromString("org/example/Foo").equals(
         ClassName.fromString("org.example.Bar")));
-  }
-
-  @Test
-  public void nameToClassShouldReturnClassWhenKnownToLoader() {
-    assertEquals(Option.some(String.class),
-        ClassName.nameToClass().apply(new ClassName("java.lang.String")));
-  }
-
-  @Test
-  public void stringToClassShouldReturnNoneWhenClassNotKnownToLoader() {
-    assertEquals(Option.none(),
-        ClassName.nameToClass().apply(new ClassName("org.unknown.Unknown")));
-  }
-
-  @Test
-  public void shouldObeyHashcodeEqualsContract() {
-    EqualsVerifier.forClass(ClassName.class).verify();
   }
 
 }

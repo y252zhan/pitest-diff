@@ -1,7 +1,7 @@
 package org.pitest.process;
 
 public class KnownLocationJavaExecutableLocator implements
-JavaExecutableLocator {
+    JavaExecutableLocator {
 
   private final String location;
 
@@ -9,7 +9,6 @@ JavaExecutableLocator {
     this.location = location;
   }
 
-  @Override
   public String javaExecutable() {
     return this.location;
   }

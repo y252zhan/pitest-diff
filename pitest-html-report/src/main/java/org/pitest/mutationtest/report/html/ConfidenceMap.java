@@ -6,11 +6,11 @@ import org.pitest.mutationtest.DetectionStatus;
 
 class ConfidenceMap {
 
-  private static final EnumSet<DetectionStatus> HIGH = EnumSet
-      .of(DetectionStatus.KILLED,
-          DetectionStatus.SURVIVED,
-          DetectionStatus.NO_COVERAGE,
-          DetectionStatus.NON_VIABLE);
+  private final static EnumSet<DetectionStatus> HIGH = EnumSet
+                                                         .of(DetectionStatus.KILLED,
+                                                             DetectionStatus.SURVIVED,
+                                                             DetectionStatus.NO_COVERAGE,
+                                                             DetectionStatus.NON_VIABLE);
 
   public static boolean hasHighConfidence(final DetectionStatus status) {
     return HIGH.contains(status);

@@ -1,12 +1,12 @@
 /*
  * Copyright 2010 Henry Coles
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -25,17 +25,19 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+
 import org.pitest.boot.HotSwapAgent;
 import org.pitest.classinfo.ClassName;
 import org.pitest.classpath.ClassPathByteArraySource;
 import org.pitest.coverage.CoverageTransformer;
 import org.pitest.dependency.DependencyExtractor;
+import org.pitest.execute.Pitest;
+import org.pitest.execute.UnGroupedStrategy;
 import org.pitest.functional.FCollection;
 import org.pitest.functional.predicate.Predicate;
-import org.pitest.help.PitHelpError;
 import org.pitest.testapi.TestUnit;
-import org.pitest.testapi.execute.FindTestUnits;
 import org.pitest.util.ExitCode;
+import org.pitest.util.Functions;
 import org.pitest.util.Log;
 import org.pitest.util.SafeDataInputStream;
 
@@ -43,7 +45,7 @@ import sun.pitest.CodeCoverageStore;
 
 public class CoverageSlave {
 
-  private static final Logger LOG = Log.getLogger();
+  private final static Logger LOG = Log.getLogger();
 
   public static void main(final String[] args) {
 
@@ -62,16 +64,14 @@ public class CoverageSlave {
 
       Log.setVerbose(paramsFromParent.isVerbose());
 
+      if (paramsFromParent.getPitConfig().verifyEnvironment().hasSome()) {
+        throw paramsFromParent.getPitConfig().verifyEnvironment().value();
+      }
+
       invokeQueue = new CoveragePipe(new BufferedOutputStream(
           s.getOutputStream()));
 
       CodeCoverageStore.init(invokeQueue);
-
-      LOG.info("Checking environment");
-
-      if (paramsFromParent.getPitConfig().verifyEnvironment().hasSome()) {
-        throw paramsFromParent.getPitConfig().verifyEnvironment().value();
-      }
 
       HotSwapAgent.addTransformer(new CoverageTransformer(
           convertToJVMClassFilter(paramsFromParent.getFilter())));
@@ -84,9 +84,6 @@ public class CoverageSlave {
 
       worker.run();
 
-    } catch (final PitHelpError phe) {
-      LOG.log(Level.SEVERE, phe.getMessage());
-      exitCode = ExitCode.JUNIT_ISSUE;
     } catch (final Throwable ex) {
       LOG.log(Level.SEVERE, "Error calculating coverage. Process will exit.",
           ex);
@@ -95,6 +92,7 @@ public class CoverageSlave {
       if (invokeQueue != null) {
         invokeQueue.end(exitCode);
       }
+
       try {
         if (s != null) {
           s.close();
@@ -111,7 +109,6 @@ public class CoverageSlave {
   private static Predicate<String> convertToJVMClassFilter(
       final Predicate<String> child) {
     return new Predicate<String>() {
-      @Override
       public Boolean apply(final String a) {
         return child.apply(a.replace("/", "."));
       }
@@ -142,11 +139,9 @@ public class CoverageSlave {
 
   private static List<TestUnit> discoverTests(
       final CoverageOptions paramsFromParent, final List<ClassName> classes) {
-    final FindTestUnits finder = new FindTestUnits(
-        paramsFromParent.getPitConfig());
-    final List<TestUnit> tus = finder
-        .findTestUnitsForAllSuppliedClasses(FCollection.flatMap(classes,
-            ClassName.nameToClass()));
+    final List<TestUnit> tus = Pitest.findTestUnitsForAllSuppliedClasses(
+        paramsFromParent.getPitConfig(), new UnGroupedStrategy(),
+        FCollection.flatMap(classes, Functions.nameToClass()));
     LOG.info("Found  " + tus.size() + " tests");
     return tus;
   }
